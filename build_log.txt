@@ -1,0 +1,2700 @@
+yarn install v1.22.10
+[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+Done in 19.84s.
+Building image in dockerfiles/theia-dev
+Copying Che-Theia generator
+[1mBuilding Docker Image eclipse/che-theia-dev:next (target alpine) from /home/ubuntu/rohan/che-theia/dockerfiles/theia-dev directory with tag next[0m
+Sending build context to Docker daemon  561.7kB
+Step 1/11 : FROM node:12.20.0-alpine3.12
+ ---> 575a04e15e83
+Step 2/11 : RUN apk add --update --no-cache     curl     jq     make gcc g++ python2     git openssh openssh-keygen mandoc git-doc     less     bash     libx11-dev libxkbfile-dev     rsync     patch
+ ---> Using cache
+ ---> 04646ae00d10
+Step 3/11 : ENV HOME=/home/theia-dev     PATH=/home/theia-dev/.npm-global/bin:${PATH}     USE_LOCAL_GIT=true     LOCAL_GIT_DIRECTORY=/usr     GIT_EXEC_PATH=/usr/libexec/git-core     THEIA_ELECTRON_SKIP_REPLACE_FFMPEG=true     ELECTRON_SKIP_BINARY_DOWNLOAD=1     YARN_FLAGS=""
+ ---> Using cache
+ ---> 14f37cee315d
+Step 4/11 : COPY asset-unpacked-generator ${HOME}/eclipse-che-theia-generator
+ ---> Using cache
+ ---> d31d9eb07141
+Step 5/11 : WORKDIR ${HOME}
+ ---> Using cache
+ ---> 76f0edd12144
+Step 6/11 : EXPOSE 3000 3030
+ ---> Using cache
+ ---> 3d775ac3ce20
+Step 7/11 : RUN npm config set prefix "${HOME}/.npm-global" &&     echo "--global-folder \"${HOME}/.yarn-global\"" > ${HOME}/.yarnrc &&     yarn config set network-timeout 600000 -g &&     yarn ${YARN_FLAGS} global add yo generator-code vsce @theia/generator-plugin@0.0.1-1622834185 file:${HOME}/eclipse-che-theia-generator &&     rm -rf ${HOME}/eclipse-che-theia-generator &&     cat /etc/passwd |     sed s#root:x.*#theia-dev:x:\${USER_ID}:\${GROUP_ID}::${HOME}:/bin/bash#g     > ${HOME}/.passwd.template &&     cat /etc/group |     sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g     > ${HOME}/.group.template &&     mkdir /projects &&     echo "export PS1='\[\033[01;33m\](\u@container)\[\033[01;36m\] (\w) \$ \[\033[00m\]'" > ${HOME}/.bashrc  &&     mkdir -p ${HOME}/.config/insight-nodejs/ &&     echo '{"optOut": true}' > ${HOME}/.config/insight-nodejs/insight-yo.json &&     for f in "${HOME}" "/etc/passwd" "/etc/group" "/projects"; do         echo "Changing permissions on ${f}" && chgrp -R 0 ${f} &&         chmod -R g+rwX ${f};     done
+ ---> Using cache
+ ---> ef81e3d7c5b7
+Step 8/11 : WORKDIR /projects
+ ---> Using cache
+ ---> 4b851b79d8cd
+Step 9/11 : COPY src/entrypoint.sh /entrypoint.sh
+ ---> Using cache
+ ---> 32788b11af82
+Step 10/11 : ENTRYPOINT ["/entrypoint.sh"]
+ ---> Using cache
+ ---> 0f84c7c22dca
+Step 11/11 : CMD tail -f /dev/null
+ ---> Using cache
+ ---> 8c2ac896420e
+[Warning] One or more build-args [GITHUB_TOKEN] were not consumed
+Successfully built 8c2ac896420e
+Successfully tagged eclipse/che-theia-dev:next
+Build of [1;34meclipse/che-theia-dev:next [0;32m[OK][0m
+[0;32mScript run successfully: [1;34meclipse/che-theia-dev:next[0m
+Building image in dockerfiles/theia
+Current API rate limit for https://api.github.com is 
+GITHUB_TOKEN variable is not set but https://api.github.com rate limit has enough slots
+Compresing 'che-theia' --> /home/ubuntu/rohan/che-theia/dockerfiles/theia/asset-che-theia.tar.gz
+[1mBuilding Docker Image eclipse/che-theia:next (target alpine) from /home/ubuntu/rohan/che-theia/dockerfiles/theia directory with tag next[0m
+Sending build context to Docker daemon  6.815MB
+Step 1/40 : FROM eclipse/che-theia-dev:next as builder
+ ---> 8c2ac896420e
+Step 2/40 : WORKDIR ${HOME}
+ ---> Running in 3927892accd2
+Removing intermediate container 3927892accd2
+ ---> 221e71f6af00
+Step 3/40 : ARG GITHUB_TOKEN=''
+ ---> Running in 967d6c2c32e6
+Removing intermediate container 967d6c2c32e6
+ ---> 47df7846696b
+Step 4/40 : ENV GITHUB_TOKEN=$GITHUB_TOKEN
+ ---> Running in 9d3d51fa737b
+Removing intermediate container 9d3d51fa737b
+ ---> f9d2f9a71895
+Step 5/40 : ARG THEIA_GITHUB_REPO=eclipse-theia/theia
+ ---> Running in fd3eb859a91b
+Removing intermediate container fd3eb859a91b
+ ---> a228d89dc4ac
+Step 6/40 : ARG THEIA_VERSION=master
+ ---> Running in 8b62e8977df1
+Removing intermediate container 8b62e8977df1
+ ---> d58436cab93e
+Step 7/40 : ARG THEIA_COMMIT_SHA=''
+ ---> Running in c3a8a0886c2b
+Removing intermediate container c3a8a0886c2b
+ ---> 5ae32d8a5ff0
+Step 8/40 : ENV NODE_OPTIONS="--max-old-space-size=4096"
+ ---> Running in 35d3a1f196dc
+Removing intermediate container 35d3a1f196dc
+ ---> 403a848f3cd9
+Step 9/40 : ENV SKIP_LINT=true SKIP_FORMAT=true SKIP_TEST=true
+ ---> Running in 42dedff1386e
+Removing intermediate container 42dedff1386e
+ ---> 0a5cc04279c9
+Step 10/40 : ADD https://${GITHUB_TOKEN}:x-oauth-basic@api.github.com/repos/${THEIA_GITHUB_REPO}/git/refs/heads/master /tmp/branch_info.json
+
+ ---> 7c7c448868da
+Step 11/40 : RUN git clone --branch master --single-branch https://github.com/${THEIA_GITHUB_REPO} ${HOME}/theia-source-code &&     cd ${HOME}/theia-source-code && git checkout ${THEIA_COMMIT_SHA}
+ ---> Running in ce93865f24ef
+[91mCloning into '/home/theia-dev/theia-source-code'...
+[0m[91mNote: switching to '9648953cd6e8552b7e027558509ba77770bd8b6f'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 9648953cd Added Twitter to the post release process (#9686)
+[0mRemoving intermediate container ce93865f24ef
+ ---> eb0f1c1adc38
+Step 12/40 : ADD src/patches ${HOME}/patches
+ ---> d77fd1bbb874
+Step 13/40 : RUN if [ -d "${HOME}/patches/${THEIA_VERSION}" ]; then     echo "Applying patches for Theia version ${THEIA_VERSION}";     for file in $(find "${HOME}/patches/${THEIA_VERSION}" -name '*.patch'); do       echo "Patching with ${file}";       cd ${HOME}/theia-source-code && patch -p1 < ${file};     done     fi
+ ---> Running in 0075d2c1544f
+Removing intermediate container 0075d2c1544f
+ ---> acc634fcac16
+Step 14/40 : ARG CDN_PREFIX=""
+ ---> Running in fd28ab646cc6
+Removing intermediate container fd28ab646cc6
+ ---> fb82ca729346
+Step 15/40 : ARG MONACO_CDN_PREFIX=""
+ ---> Running in 7094f577ba88
+Removing intermediate container 7094f577ba88
+ ---> 2c3f65439a9e
+Step 16/40 : WORKDIR ${HOME}/theia-source-code
+ ---> Running in bfcaa1064871
+Removing intermediate container bfcaa1064871
+ ---> a32cd0661bf7
+Step 17/40 : COPY asset-che-theia.tar.gz /tmp/asset-che-theia.tar.gz
+ ---> 83ec1374c646
+Step 18/40 : RUN apk add libsecret-dev
+ ---> Running in a401a57ceb18
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/main/ppc64le/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/community/ppc64le/APKINDEX.tar.gz
+(1/46) Installing libgpg-error (1.37-r0)
+(2/46) Installing libgcrypt (1.8.8-r0)
+(3/46) Installing libintl (0.20.2-r0)
+(4/46) Installing libblkid (2.35.2-r0)
+(5/46) Installing libmount (2.35.2-r0)
+(6/46) Installing pcre (8.44-r0)
+(7/46) Installing glib (2.64.6-r0)
+(8/46) Installing libsecret (0.20.3-r0)
+(9/46) Installing xz-libs (5.2.5-r0)
+(10/46) Installing python3 (3.8.10-r0)
+(11/46) Installing gettext-asprintf (0.20.2-r0)
+(12/46) Installing libunistring (0.9.10-r0)
+(13/46) Installing gettext-libs (0.20.2-r0)
+(14/46) Installing libxml2 (2.9.10-r6)
+(15/46) Installing gettext (0.20.2-r0)
+(16/46) Installing gettext-dev (0.20.2-r0)
+(17/46) Installing bzip2-dev (1.0.8-r1)
+(18/46) Installing libxml2-utils (2.9.10-r6)
+(19/46) Installing libxslt (1.1.34-r0)
+(20/46) Installing docbook-xml (4.5-r6)
+Executing docbook-xml-4.5-r6.post-install
+(21/46) Installing docbook-xsl (1.79.2-r2)
+Executing docbook-xsl-1.79.2-r2.post-install
+(22/46) Installing linux-headers (5.4.5-r1)
+(23/46) Installing libffi-dev (3.3-r2)
+(24/46) Installing libpcre16 (8.44-r0)
+(25/46) Installing libpcre32 (8.44-r0)
+(26/46) Installing libpcrecpp (8.44-r0)
+(27/46) Installing pcre-dev (8.44-r0)
+(28/46) Installing blkid (2.35.2-r0)
+(29/46) Installing libcap-ng (0.7.10-r1)
+(30/46) Installing setpriv (2.35.2-r0)
+(31/46) Installing libsmartcols (2.35.2-r0)
+(32/46) Installing findmnt (2.35.2-r0)
+(33/46) Installing mcookie (2.35.2-r0)
+(34/46) Installing hexdump (2.35.2-r0)
+(35/46) Installing lsblk (2.35.2-r0)
+(36/46) Installing libuuid (2.35.2-r0)
+(37/46) Installing libfdisk (2.35.2-r0)
+(38/46) Installing sfdisk (2.35.2-r0)
+(39/46) Installing cfdisk (2.35.2-r0)
+(40/46) Installing util-linux (2.35.2-r0)
+(41/46) Installing util-linux-dev (2.35.2-r0)
+(42/46) Installing zlib-dev (1.2.11-r3)
+(43/46) Installing glib-dev (2.64.6-r0)
+(44/46) Installing libgpg-error-dev (1.37-r0)
+(45/46) Installing libgcrypt-dev (1.8.8-r0)
+(46/46) Installing libsecret-dev (0.20.3-r0)
+Executing busybox-1.31.1-r19.trigger
+Executing glib-2.64.6-r0.trigger
+No schema files found: doing nothing.
+OK: 357 MiB in 121 packages
+Removing intermediate container a401a57ceb18
+ ---> 76639469f2a7
+Step 19/40 : RUN mkdir -p ${HOME}/theia-source-code/che-theia/ && tar xzf /tmp/asset-che-theia.tar.gz -C ${HOME}/theia-source-code/che-theia/ && rm /tmp/asset-che-theia.tar.gz
+ ---> Running in da0bf0592fee
+Removing intermediate container da0bf0592fee
+ ---> ace74e1b61f9
+Step 20/40 : RUN che-theia init -c ${HOME}/theia-source-code/che-theia/che-theia-init-sources.yml --alias https://github.com/eclipse-che/che-theia=${HOME}/theia-source-code/che-theia
+ ---> Running in 26f4aed48aef
+copying /home/theia-dev/.yarn-global/node_modules/@eclipse-che/theia-generator/src/templates/cdn to /home/theia-dev/theia-source-code/examples/assembly/cdn
+distdir=/home/theia-dev/.yarn-global/node_modules/@eclipse-che/theia-generator/dist
+Source alias detected for https://github.com/eclipse-che/che-theia, replacing with provided source: /home/theia-dev/theia-source-code/che-theia
+Skipping cloning sources for /home/theia-dev/theia-source-code/che-theia already provided...
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-plugin-remote to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-plugin-remote
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-plugin to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-plugin-ext to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-plugin-ext
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-terminal to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-terminal
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-user-preferences to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-user-preferences
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/che-theia-hosted-plugin-manager-extension to /home/theia-dev/theia-source-code/packages/@che-che-theia-hosted-plugin-manager-extension
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-dashboard to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-dashboard
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-activity-tracker to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-activity-tracker
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-about to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-about
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-preferences-provider-extension to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-preferences-provider-extension
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-git-provisioner to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-git-provisioner
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-logging to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-logging
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-messaging to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-messaging
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-mini-browser to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-mini-browser
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-file-sync-tracker to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-file-sync-tracker
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-cli-endpoint to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-cli-endpoint
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-workspace to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-workspace
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-remote-api to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-remote-api
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-remote-impl-che-server to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-remote-impl-che-server
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-remote-impl-k8s to /home/theia-dev/theia-source-code/packages/@che-eclipse-che-theia-remote-impl-k8s
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/containers-plugin to /home/theia-dev/theia-source-code/plugins/containers-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/ext-plugin to /home/theia-dev/theia-source-code/plugins/ext-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/workspace-plugin to /home/theia-dev/theia-source-code/plugins/workspace-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/resource-monitor-plugin to /home/theia-dev/theia-source-code/plugins/resource-monitor-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/ports-plugin to /home/theia-dev/theia-source-code/plugins/ports-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/task-plugin to /home/theia-dev/theia-source-code/plugins/task-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/welcome-plugin to /home/theia-dev/theia-source-code/plugins/welcome-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/ssh-plugin to /home/theia-dev/theia-source-code/plugins/ssh-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/telemetry-plugin to /home/theia-dev/theia-source-code/plugins/telemetry-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/github-auth-plugin to /home/theia-dev/theia-source-code/plugins/github-auth-plugin
+Creating symlink from /home/theia-dev/theia-source-code/che-theia/plugins/recommendations-plugin to /home/theia-dev/theia-source-code/plugins/recommendations-plugin
+Removing intermediate container 26f4aed48aef
+ ---> c90c43fe0fa2
+Step 21/40 : RUN rm -rf ${HOME}/theia-source-code/examples/browser &&     rm -rf ${HOME}/theia-source-code/examples/electron &&     rm -rf ${HOME}/theia-source-code/packages/cpp &&     rm -rf ${HOME}/theia-source-code/packages/git &&     rm -rf ${HOME}/theia-source-code/packages/java &&     rm -rf ${HOME}/theia-source-code/packages/java-debug &&     rm -rf ${HOME}/theia-source-code/packages/python &&     rm -rf ${HOME}/theia-source-code/packages/typescript &&     sed -i 's|  "resolutions": {|  "resolutions": {\n    "**/electron": "7.0.0",|' ${HOME}/theia-source-code/package.json &&     find . -name "electron-browser"  | xargs rm -rf {} &&     find . -name "*-electron-module.ts"  | xargs rm -rf {} &&     rm -rf ${HOME}/theia-source-code/dev-packages/electron/native &&     echo "" > ${HOME}/theia-source-code/dev-packages/electron/scripts/post-install.js &&     sed -i 's|concurrently -n compile,lint -c blue,green \\"theiaext compile\\" \\"theiaext lint\\"|concurrently -n compile -c blue \\"theiaext compile\\"|' ${HOME}/theia-source-code/dev-packages/ext-scripts/package.json &&     sed -i -n '/.*packages\/cpp/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i -n '/.*packages\/git/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i -n '/.*packages\/java/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i -n '/.*packages\/java-debug/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i -n '/.*packages\/python/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i -n '/.*packages\/typescript/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i -n '/.*examples\/api-samples/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i -n '/.*examples\/electron/{N;s/.*//;x;d;};x;p;${x;p;}' ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json &&     sed -i 's|.*"prepare:build".*|    \"prepare:build\"\: \"yarn build \&\& lerna run build\", |' ${HOME}/theia-source-code/package.json &&     cat ${HOME}/theia-source-code/configs/root-compilation.tsconfig.json
+ ---> Running in 32c8414d74c4
+
+
+
+
+
+
+
+
+{
+  "extends": "./base.tsconfig",
+  "include": [],
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "lib"
+  },
+  "references": [
+    {
+      "path": "../dev-packages/application-manager/compile.tsconfig.json"
+    },
+    {
+      "path": "../dev-packages/application-package/compile.tsconfig.json"
+    },
+    {
+      "path": "../dev-packages/cli/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/bulk-edit/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/callhierarchy/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/console/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/core/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/debug/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/editor-preview/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/editor/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/external-terminal/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/file-search/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/filesystem/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/getting-started/compile.tsconfig.json"
+    },
+
+    {
+      "path": "../packages/keymaps/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/markers/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/messages/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/metrics/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/mini-browser/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/monaco/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/navigator/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/outline-view/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/output/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/plugin-dev/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/plugin-ext-vscode/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/plugin-ext/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/plugin-metrics/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/plugin/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/preferences/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/preview/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/process/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/scm/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/scm-extra/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/search-in-workspace/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/task/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/terminal/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/typehierarchy/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/userstorage/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/variable-resolver/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/workspace/compile.tsconfig.json"
+    },
+
+
+    {
+      "path": "../packages/vsx-registry/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/timeline/compile.tsconfig.json"
+    },
+    {
+      "path": "../packages/property-view/compile.tsconfig.json"
+    },
+    {
+      "path": "../dev-packages/ovsx-client/compile.tsconfig.json"
+    },
+    {
+      "path": "../examples/assembly/compile.tsconfig.json"
+    }
+  ]
+}
+Removing intermediate container 32c8414d74c4
+ ---> b05faf9eeec4
+Step 22/40 : RUN che-theia cdn --theia="${CDN_PREFIX}" --monaco="${MONACO_CDN_PREFIX}"
+ ---> Running in 7732b42a0269
+Removing intermediate container 7732b42a0269
+ ---> 08dc2680de1d
+Step 23/40 : RUN if [ -z $GITHUB_TOKEN ]; then unset GITHUB_TOKEN; fi &&     yarn ${YARN_FLAGS}
+ ---> Running in 14f37dc90a1f
+yarn install v1.22.5
+$ node-gyp install
+[91mgyp info it worked if it ends with ok
+gyp info using node-gyp@5.1.0
+gyp info using node@12.20.0 | linux | ppc64
+[0m[91mgyp http GET https://nodejs.org/download/release/v12.20.0/node-v12.20.0-headers.tar.gz
+[0m[91mgyp[0m[91m http 200 https://nodejs.org/download/release/v12.20.0/node-v12.20.0-headers.tar.gz
+[0m[91mgyp http GET https://nodejs.org/download/release/v12.20.0/SHASUMS256.txt
+[0m[91mgyp http 200 https://nodejs.org/download/release/v12.20.0/SHASUMS256.txt
+[0m12.20.0
+[91mgyp info ok 
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+[91mwarning Resolution field "electron@7.0.0" is incompatible with requested version "electron@^9.0.2"
+[0m[91mwarning workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @eclipse-che/theia-plugin-ext > @types/reflect-metadata@0.1.0: This is a stub types definition for reflect-metadata (https://github.com/rbuckton/ReflectDecorators). reflect-metadata provides its own type definitions, so you don't need @types/reflect-metadata installed!
+[0m[91mwarning workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @eclipse-che/theia-plugin-ext > webpack > watchpack > watchpack-chokidar2 > chokidar@2.1.8: Chokidar 2 will break on node v14+. Upgrade to chokidar 3 with 15x less dependencies.
+[0m[91mwarning workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @eclipse-che/theia-plugin-ext > webpack > node-libs-browser > url > querystring@0.2.0: The
+[0m[91mwarning workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @eclipse-che/theia-plugin-ext > webpack > watchpack > watchpack-chokidar2 > chokidar > fsevents@1.2.13: fsevents 1 will break on node v14+ and could be using insecure binaries. Upgrade to fsevents 2.
+[0m[91mwarning workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @eclipse-che/theia-plugin-ext > webpack-cli > findup-sync > micromatch > snapdragon > source-map-resolve > urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+[0m[91mwarning workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @eclipse-che/theia-plugin-ext > webpack-cli > findup-sync > micromatch > snapdragon > source-map-resolve > resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+[0m[3/5] Fetching packages...
+info fsevents@2.1.3: The platform "linux" is incompatible with this module.
+info "fsevents@2.1.3" is an optional dependency and failed compatibility check. Excluding it from installation.
+info fsevents@2.3.2: The platform "linux" is incompatible with this module.
+info "fsevents@2.3.2" is an optional dependency and failed compatibility check. Excluding it from installation.
+info fsevents@1.2.13: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.13" is an optional dependency and failed compatibility check. Excluding it from installation.
+[4/5] Linking dependencies...
+[91mwarning " > chai-string@1.5.0" has unmet peer dependency "chai@^4.1.2".
+[0m[91mwarning " > eslint-plugin-sonarjs@0.5.0" has incorrect peer dependency "eslint@^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/application-manager > @theia/compression-webpack-plugin@3.0.0" has incorrect peer dependency "webpack@^4.3.0".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/application-manager > font-awesome-webpack@0.0.5-beta.2" has unmet peer dependency "font-awesome@>=4.3.0".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/debug > requestretry@3.1.0" has unmet peer dependency "request@2.*.*".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/messages > react-perfect-scrollbar@1.5.8" has unmet peer dependency "react@>=16.3.3".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/messages > react-perfect-scrollbar@1.5.8" has unmet peer dependency "react-dom@>=16.3.3".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/scm > react-autosize-textarea@7.1.0" has unmet peer dependency "react@^0.14.0 || ^15.0.0 || ^16.0.0".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/scm > react-autosize-textarea@7.1.0" has unmet peer dependency "react-dom@^0.14.0 || ^15.0.0 || ^16.0.0".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @theia/application-manager > font-awesome-webpack > less-loader@2.2.3" has incorrect peer dependency "less@^2.3.1".
+[0m[91mwarning "workspace-aggregator-9e5e82cb-3a65-44d1-b22a-73699ac9f598 > @eclipse-che/theia-assembly > html-webpack-plugin@5.3.2" has unmet peer dependency "webpack@^5.20.0".
+[0m[5/5] Building fresh packages...
+success Saved lockfile.
+$ node scripts/post-install.js
+$ yarn prepare:references && yarn --cwd packages/core prepare && yarn prepare:build && yarn prepare:hoisting && yarn download:plugins
+yarn run v1.22.5
+$ node scripts/compile-references.js
+[91merror: @theia/monorepo untracked reference: ../examples/assembly/compile.tsconfig.json
+[0m[91merror: @theia/monorepo missing reference: ../examples/api-samples/compile.tsconfig.json
+[0m[91minfo: /home/theia-dev/theia-source-code/configs/root-compilation.tsconfig.json updated.
+[0m[91merror: @theia/monorepo invalid mapped path: {"@eclipse-che/che-theia-hosted-plugin-manager-extension/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-about/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-activity-tracker/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-cli-endpoint/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-dashboard-extension/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-file-sync-tracker/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-git-provisioner/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-logging/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-messaging/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-mini-browser/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-plugin-ext/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-remote/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/plugin/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-preferences-provider-extension/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-remote-api/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-remote-impl-che-server/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-remote-impl-k8s/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-terminal/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-user-preferences-synchronizer/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-workspace-extension/*": "undefined"}
+error: @theia/monorepo invalid mapped path: {"@eclipse-che/theia-assembly/*": "undefined"}
+info: /home/theia-dev/theia-source-code/tsconfig.json updated.
+TypeScript references were out of sync and got updated.
+[0mDone in 15.65s.
+yarn run v1.22.5
+$ node scripts/generate-shared.js
+Done in 1.29s.
+yarn run v1.22.5
+$ yarn build && lerna run build
+$ tsc -b configs/root-compilation.tsconfig.json
+[91mlerna[0m[91m [0m[91minfo [0m[91mversion[0m[91m 2.11.0
+[0m@theia/plugin: $ theiaext build
+@theia/ovsx-client: $ theiaext build
+@theia/plugin: $ concurrently -n compile -c blue "theiaext compile"
+@theia/application-package: $ theiaext build
+@theia/ovsx-client: $ concurrently -n compile -c blue "theiaext compile"
+@eclipse-che/theia-remote-api: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@theia/application-package: $ concurrently -n compile -c blue "theiaext compile"
+@theia/application-package: [compile] $ tsc -b compile.tsconfig.json
+@theia/plugin: [compile] $ tsc -b compile.tsconfig.json
+@theia/ovsx-client: [compile] $ tsc -b compile.tsconfig.json
+@theia/plugin: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-remote-api: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-remote-api: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-remote-api: [compile] $ tsc
+@theia/application-package: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-remote-api: [format] skip format check
+@theia/ovsx-client: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-remote-api: [lint] skip lint check
+@eclipse-che/theia-remote-api: [format] yarn format exited with code 0
+@eclipse-che/theia-remote-api: [lint] yarn lint exited with code 0
+@eclipse-che/theia-remote-api: [compile] yarn compile exited with code 0
+@eclipse-che/theia-remote-impl-k8s: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@theia/application-manager: $ theiaext build
+@eclipse-che/theia-remote-impl-che-server: $ concurrently -n "format,lint,compile" -c "red,green,blue,purple" "yarn format" "yarn lint" "yarn compile"
+@theia/application-manager: $ concurrently -n compile -c blue "theiaext compile"
+@theia/core: $ theiaext build
+@theia/core: $ concurrently -n compile -c blue "theiaext compile"
+@eclipse-che/theia-remote-impl-k8s: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@theia/application-manager: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-remote-impl-k8s: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-remote-impl-k8s: [compile] $ tsc
+@eclipse-che/theia-remote-impl-k8s: [format] skip format check
+@eclipse-che/theia-remote-impl-k8s: [format] yarn format exited with code 0
+@eclipse-che/theia-remote-impl-k8s: [lint] skip lint check
+@eclipse-che/theia-remote-impl-k8s: [lint] yarn lint exited with code 0
+@eclipse-che/theia-remote-impl-che-server: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@theia/core: [compile] $ tsc -b compile.tsconfig.json
+@theia/application-manager: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-remote-impl-che-server: [format] skip format check
+@eclipse-che/theia-remote-impl-che-server: [format] yarn format exited with code 0
+@eclipse-che/theia-remote-impl-che-server: [compile] $ tsc
+@eclipse-che/theia-remote-impl-che-server: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@theia/core: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-remote-impl-che-server: [lint] skip lint check
+@eclipse-che/theia-remote-impl-che-server: [lint] yarn lint exited with code 0
+@eclipse-che/theia-remote-impl-k8s: [compile] yarn compile exited with code 0
+@eclipse-che/theia-remote-impl-che-server: [compile] yarn compile exited with code 0
+@theia/cli: $ theiaext build
+@theia/cli: $ concurrently -n compile -c blue "theiaext compile"
+@eclipse-che/theia-logging: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-file-sync-tracker: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-dashboard-extension: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@theia/cli: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-file-sync-tracker: [compile] $ tsc
+@eclipse-che/theia-file-sync-tracker: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-logging: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-logging: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-logging: [lint] skip lint check
+@eclipse-che/theia-logging: [lint] yarn lint exited with code 0
+@theia/cli: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-file-sync-tracker: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-logging: [compile] $ tsc
+@eclipse-che/theia-logging: [format] skip format check
+@eclipse-che/theia-file-sync-tracker: [lint] skip lint check
+@eclipse-che/theia-file-sync-tracker: [lint] yarn lint exited with code 0
+@eclipse-che/theia-logging: [format] yarn format exited with code 0
+@eclipse-che/theia-dashboard-extension: [compile] $ tsc
+@eclipse-che/theia-dashboard-extension: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-dashboard-extension: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-file-sync-tracker: [format] skip format check
+@eclipse-che/theia-file-sync-tracker: [format] yarn format exited with code 0
+@eclipse-che/theia-dashboard-extension: [format] skip format check
+@eclipse-che/theia-dashboard-extension: [lint] skip lint check
+@eclipse-che/theia-dashboard-extension: [format] yarn format exited with code 0
+@eclipse-che/theia-dashboard-extension: [lint] yarn lint exited with code 0
+@theia/filesystem: $ theiaext build
+@theia/filesystem: $ concurrently -n compile -c blue "theiaext compile"
+@theia/filesystem: [compile] $ tsc -b compile.tsconfig.json
+@theia/filesystem: [compile] theiaext compile exited with code 0
+@theia/messages: $ theiaext build
+@theia/messages: $ concurrently -n compile -c blue "theiaext compile"
+@theia/messages: [compile] $ tsc -b compile.tsconfig.json
+@theia/messages: [compile] theiaext compile exited with code 0
+@theia/metrics: $ theiaext build
+@theia/metrics: $ concurrently -n compile -c blue "theiaext compile"
+@theia/metrics: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-logging: [compile] yarn compile exited with code 0
+@theia/metrics: [compile] theiaext compile exited with code 0
+@theia/outline-view: $ theiaext build
+@eclipse-che/theia-dashboard-extension: [compile] yarn compile exited with code 0
+@theia/process: $ theiaext build
+@theia/outline-view: $ concurrently -n compile -c blue "theiaext compile"
+@eclipse-che/theia-file-sync-tracker: [compile] yarn compile exited with code 0
+@theia/process: $ concurrently -n compile -c blue "theiaext compile"
+@theia/outline-view: [compile] $ tsc -b compile.tsconfig.json
+@theia/variable-resolver: $ theiaext build
+@theia/process: [compile] $ tsc -b compile.tsconfig.json
+@theia/variable-resolver: $ concurrently -n compile -c blue "theiaext compile"
+@theia/outline-view: [compile] theiaext compile exited with code 0
+@theia/process: [compile] theiaext compile exited with code 0
+@theia/variable-resolver: [compile] $ tsc -b compile.tsconfig.json
+@theia/variable-resolver: [compile] theiaext compile exited with code 0
+@theia/mini-browser: $ theiaext build
+@theia/mini-browser: $ concurrently -n compile -c blue "theiaext compile"
+@theia/property-view: $ theiaext build
+@theia/userstorage: $ theiaext build
+@theia/editor: $ theiaext build
+@theia/userstorage: $ concurrently -n compile -c blue "theiaext compile"
+@theia/property-view: $ concurrently -n compile -c blue "theiaext compile"
+@theia/mini-browser: [compile] $ tsc -b compile.tsconfig.json
+@theia/editor: $ concurrently -n compile -c blue "theiaext compile"
+@theia/property-view: [compile] $ tsc -b compile.tsconfig.json
+@theia/userstorage: [compile] $ tsc -b compile.tsconfig.json
+@theia/mini-browser: [compile] theiaext compile exited with code 0
+@theia/editor: [compile] $ tsc -b compile.tsconfig.json
+@theia/property-view: [compile] theiaext compile exited with code 0
+@theia/userstorage: [compile] theiaext compile exited with code 0
+@theia/editor: [compile] theiaext compile exited with code 0
+@theia/workspace: $ theiaext build
+@theia/workspace: $ concurrently -n compile -c blue "theiaext compile"
+@theia/workspace: [compile] $ tsc -b compile.tsconfig.json
+@theia/workspace: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-workspace-extension: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@theia/editor-preview: $ theiaext build
+@theia/external-terminal: $ theiaext build
+@theia/file-search: $ theiaext build
+@theia/editor-preview: $ concurrently -n compile -c blue "theiaext compile"
+@theia/external-terminal: $ concurrently -n compile -c blue "theiaext compile"
+@theia/file-search: $ concurrently -n compile -c blue "theiaext compile"
+@eclipse-che/theia-workspace-extension: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@theia/editor-preview: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-workspace-extension: [compile] $ tsc
+@eclipse-che/theia-workspace-extension: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-workspace-extension: [format] skip format check
+@eclipse-che/theia-workspace-extension: [format] yarn format exited with code 0
+@theia/external-terminal: [compile] $ tsc -b compile.tsconfig.json
+@theia/file-search: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-workspace-extension: [lint] skip lint check
+@eclipse-che/theia-workspace-extension: [lint] yarn lint exited with code 0
+@theia/editor-preview: [compile] theiaext compile exited with code 0
+@theia/file-search: [compile] theiaext compile exited with code 0
+@theia/external-terminal: [compile] theiaext compile exited with code 0
+@theia/navigator: $ theiaext build
+@theia/navigator: $ concurrently -n compile -c blue "theiaext compile"
+@theia/typehierarchy: $ theiaext build
+@theia/navigator: [compile] $ tsc -b compile.tsconfig.json
+@theia/typehierarchy: $ concurrently -n compile -c blue "theiaext compile"
+@theia/terminal: $ theiaext build
+@theia/terminal: $ concurrently -n compile -c blue "theiaext compile"
+@theia/typehierarchy: [compile] $ tsc -b compile.tsconfig.json
+@theia/navigator: [compile] theiaext compile exited with code 0
+@theia/terminal: [compile] $ tsc -b compile.tsconfig.json
+@theia/typehierarchy: [compile] theiaext compile exited with code 0
+@theia/terminal: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-workspace-extension: [compile] yarn compile exited with code 0
+@theia/search-in-workspace: $ theiaext build
+@theia/search-in-workspace: $ concurrently -n compile -c blue "theiaext compile"
+@eclipse-che/theia-terminal: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@theia/scm: $ theiaext build
+@theia/search-in-workspace: [compile] $ tsc -b compile.tsconfig.json
+@theia/markers: $ theiaext build
+@theia/scm: $ concurrently -n compile -c blue "theiaext compile"
+@theia/markers: $ concurrently -n compile -c blue "theiaext compile"
+@theia/scm: [compile] $ tsc -b compile.tsconfig.json
+@theia/markers: [compile] $ tsc -b compile.tsconfig.json
+@theia/search-in-workspace: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-terminal: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-terminal: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-terminal: [format] skip format check
+@eclipse-che/theia-terminal: [format] yarn format exited with code 0
+@eclipse-che/theia-terminal: [compile] $ tsc
+@theia/scm: [compile] theiaext compile exited with code 0
+@theia/markers: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-terminal: [lint] skip lint check
+@eclipse-che/theia-terminal: [lint] yarn lint exited with code 0
+@theia/timeline: $ theiaext build
+@theia/timeline: $ concurrently -n compile -c blue "theiaext compile"
+@theia/timeline: [compile] $ tsc -b compile.tsconfig.json
+@theia/timeline: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-terminal: [compile] yarn compile exited with code 0
+@theia/monaco: $ theiaext build
+@theia/scm-extra: $ theiaext build
+@theia/scm-extra: $ concurrently -n compile -c blue "theiaext compile"
+@theia/monaco: $ concurrently -n compile -c blue "theiaext compile"
+@theia/monaco: [compile] $ tsc -b compile.tsconfig.json
+@theia/scm-extra: [compile] $ tsc -b compile.tsconfig.json
+@theia/scm-extra: [compile] theiaext compile exited with code 0
+@theia/monaco: [compile] theiaext compile exited with code 0
+@theia/callhierarchy: $ theiaext build
+@theia/bulk-edit: $ theiaext build
+@theia/callhierarchy: $ concurrently -n compile -c blue "theiaext compile"
+@theia/bulk-edit: $ concurrently -n compile -c blue "theiaext compile"
+@theia/console: $ theiaext build
+@theia/keymaps: $ theiaext build
+@theia/callhierarchy: [compile] $ tsc -b compile.tsconfig.json
+@theia/console: $ concurrently -n compile -c blue "theiaext compile"
+@theia/bulk-edit: [compile] $ tsc -b compile.tsconfig.json
+@theia/keymaps: $ concurrently -n compile -c blue "theiaext compile"
+@theia/console: [compile] $ tsc -b compile.tsconfig.json
+@theia/callhierarchy: [compile] theiaext compile exited with code 0
+@theia/bulk-edit: [compile] theiaext compile exited with code 0
+@theia/keymaps: [compile] $ tsc -b compile.tsconfig.json
+@theia/console: [compile] theiaext compile exited with code 0
+@theia/preferences: $ theiaext build
+@theia/keymaps: [compile] theiaext compile exited with code 0
+@theia/preferences: $ concurrently -n compile -c blue "theiaext compile"
+@theia/output: $ theiaext build
+@theia/output: $ concurrently -n compile -c blue "theiaext compile"
+@theia/preview: $ theiaext build
+@theia/preferences: [compile] $ tsc -b compile.tsconfig.json
+@theia/preview: $ concurrently -n compile -c blue "theiaext compile"
+@theia/output: [compile] $ tsc -b compile.tsconfig.json
+@theia/preview: [compile] $ tsc -b compile.tsconfig.json
+@theia/preferences: [compile] theiaext compile exited with code 0
+@theia/output: [compile] theiaext compile exited with code 0
+@theia/preview: [compile] theiaext compile exited with code 0
+@theia/task: $ theiaext build
+@theia/task: $ concurrently -n compile -c blue "theiaext compile"
+@theia/getting-started: $ theiaext build
+@theia/getting-started: $ concurrently -n compile -c blue "theiaext compile"
+@theia/task: [compile] $ tsc -b compile.tsconfig.json
+@theia/getting-started: [compile] $ tsc -b compile.tsconfig.json
+@theia/task: [compile] theiaext compile exited with code 0
+@theia/getting-started: [compile] theiaext compile exited with code 0
+@theia/debug: $ theiaext build
+@theia/debug: $ concurrently -n compile -c blue "theiaext compile"
+@theia/debug: [compile] $ tsc -b compile.tsconfig.json
+@theia/debug: [compile] theiaext compile exited with code 0
+@theia/plugin-ext: $ theiaext build
+@theia/plugin-ext: $ concurrently -n compile -c blue "theiaext compile"
+@theia/plugin-ext: [compile] $ tsc -b compile.tsconfig.json
+@theia/plugin-ext: [compile] theiaext compile exited with code 0
+@theia/plugin-dev: $ theiaext build
+@theia/plugin-ext-vscode: $ theiaext build
+@eclipse-che/theia-plugin-ext: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && yarn run compileWorker
+@theia/plugin-dev: $ concurrently -n compile -c blue "theiaext compile"
+@theia/plugin-ext-vscode: $ concurrently -n compile -c blue "theiaext compile"
+@theia/plugin-metrics: $ theiaext build
+@theia/plugin-metrics: $ concurrently -n compile -c blue "theiaext compile"
+@theia/plugin-dev: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-plugin-ext: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@theia/plugin-metrics: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-plugin-ext: [format] skip format check
+@theia/plugin-ext-vscode: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-plugin-ext: [format] yarn format exited with code 0
+@eclipse-che/theia-plugin-ext: [compile] $ tsc
+@eclipse-che/theia-plugin-ext: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-plugin-ext: [lint] skip lint check
+@eclipse-che/theia-plugin-ext: [lint] yarn lint exited with code 0
+@theia/plugin-ext-vscode: [compile] theiaext compile exited with code 0
+@theia/plugin-metrics: [compile] theiaext compile exited with code 0
+@theia/plugin-dev: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-plugin-ext: [compile] yarn compile exited with code 0
+@eclipse-che/theia-plugin-ext: $ webpack-cli --config webpack.config.js
+[91m@eclipse-che/theia-plugin-ext: clean-webpack-plugin: /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-plugin-ext/lib/webworker has been removed.
+[0m@eclipse-che/theia-plugin-ext: Hash: eddf365d706e0a669c9b
+@eclipse-che/theia-plugin-ext: Version: webpack 4.46.0
+@eclipse-che/theia-plugin-ext: Time: 32253ms
+@eclipse-che/theia-plugin-ext: Built at: 07/08/2021 11:21:00 AM
+@eclipse-che/theia-plugin-ext:                          Asset      Size  Chunks                          Chunk Names
+@eclipse-che/theia-plugin-ext:     che-api-worker-provider.js   612 KiB       0  [emitted]        [big]  main
+@eclipse-che/theia-plugin-ext: che-api-worker-provider.js.map  1.58 MiB       0  [emitted] [dev]         main
+@eclipse-che/theia-plugin-ext: Entrypoint main [big] = che-api-worker-provider.js che-api-worker-provider.js.map
+@eclipse-che/theia-plugin-ext:   [3] ./lib/common/che-protocol.js 3.72 KiB {0} [built]
+@eclipse-che/theia-plugin-ext:  [21] /home/theia-dev/theia-source-code/packages/plugin-ext/lib/common/rpc-protocol.js 21.3 KiB {0} [built]
+@eclipse-che/theia-plugin-ext:  [58] ./lib/plugin/webworker/che-api-worker-provider.js 1.64 KiB {0} [built]
+@eclipse-che/theia-plugin-ext:  [59] /home/theia-dev/theia-source-code/packages/plugin-ext/lib/common/plugin-api-rpc.js 12.7 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [120] ./lib/plugin/che-api.js 18.8 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [121] ./lib/plugin/che-task-impl.js 8.06 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [122] ./lib/plugin/che-devfile.js 4.8 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [123] ./lib/plugin/che-endpoint.js 4.95 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [124] ./lib/plugin/che-github.js 1.19 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [125] ./lib/plugin/che-http.js 3.5 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [126] ./lib/plugin/che-k8s.js 1.02 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [127] ./lib/plugin/che-oauth.js 1.2 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [128] ./lib/plugin/che-openshift.js 995 bytes {0} [built]
+@eclipse-che/theia-plugin-ext: [129] ./lib/plugin/che-product.js 1.61 KiB {0} [built]
+@eclipse-che/theia-plugin-ext: [130] ./lib/plugin/che-sidecar-content-reader.js 4.15 KiB {0} [built]
+@eclipse-che/theia-plugin-ext:     + 164 hidden modules
+@eclipse-che/theia-plugin-ext: WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+@eclipse-che/theia-plugin-ext: This can impact web performance.
+@eclipse-che/theia-plugin-ext: Assets: 
+@eclipse-che/theia-plugin-ext:   che-api-worker-provider.js (612 KiB)
+@eclipse-che/theia-plugin-ext: WARNING in entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+@eclipse-che/theia-plugin-ext: Entrypoints:
+@eclipse-che/theia-plugin-ext:   main (612 KiB)
+@eclipse-che/theia-plugin-ext:       che-api-worker-provider.js
+@eclipse-che/theia-plugin-ext: WARNING in webpack performance recommendations: 
+@eclipse-che/theia-plugin-ext: You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+@eclipse-che/theia-plugin-ext: For more info visit https://webpack.js.org/guides/code-splitting/
+@eclipse-che/theia-about: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/che-theia-hosted-plugin-manager-extension: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-messaging: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-activity-tracker: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-about: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [compile] $ tsc
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [format] skip format check
+@eclipse-che/theia-messaging: [compile] $ tsc
+@eclipse-che/theia-activity-tracker: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-about: [compile] $ yarn run setup-build-details && tsc
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [format] yarn format exited with code 0
+@eclipse-che/theia-messaging: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-activity-tracker: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-about: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-about: [format] skip format check
+@eclipse-che/theia-about: [format] yarn format exited with code 0
+@eclipse-che/theia-messaging: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-activity-tracker: [format] skip format check
+@eclipse-che/theia-activity-tracker: [lint] skip lint check
+@eclipse-che/theia-activity-tracker: [format] yarn format exited with code 0
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [lint] skip lint check
+@eclipse-che/theia-activity-tracker: [lint] yarn lint exited with code 0
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [lint] yarn lint exited with code 0
+@eclipse-che/theia-messaging: [format] skip format check
+@eclipse-che/theia-messaging: [format] yarn format exited with code 0
+@eclipse-che/theia-about: [lint] skip lint check
+@eclipse-che/theia-messaging: [lint] skip lint check
+@eclipse-che/theia-about: [lint] yarn lint exited with code 0
+@eclipse-che/theia-activity-tracker: [compile] $ tsc
+@eclipse-che/theia-messaging: [lint] yarn lint exited with code 0
+@eclipse-che/theia-about: [compile] $ node ./scripts/generate-about-details.js
+@eclipse-che/theia-about: [compile] Writing build details to /home/theia-dev/theia-source-code/che-theia/extensions/eclipse-che-theia-about/conf/about-details.json
+@eclipse-che/theia-messaging: [compile] yarn compile exited with code 0
+@eclipse-che/che-theia-hosted-plugin-manager-extension: [compile] yarn compile exited with code 0
+@eclipse-che/theia-activity-tracker: [compile] yarn compile exited with code 0
+@eclipse-che/theia-mini-browser: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-remote: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-preferences-provider-extension: $ concurrently -n "format,lint,compile" -c "red,green,blue,purple" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-mini-browser: [compile] $ tsc
+@eclipse-che/theia-remote: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-remote: [compile] $ tsc
+@eclipse-che/theia-remote: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-mini-browser: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-mini-browser: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-preferences-provider-extension: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-preferences-provider-extension: [compile] $ tsc
+@eclipse-che/theia-mini-browser: [lint] skip lint check
+@eclipse-che/theia-mini-browser: [lint] yarn lint exited with code 0
+@eclipse-che/theia-preferences-provider-extension: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-mini-browser: [format] skip format check
+@eclipse-che/theia-mini-browser: [format] yarn format exited with code 0
+@eclipse-che/theia-remote: [lint] skip lint check
+@eclipse-che/theia-remote: [format] skip format check
+@eclipse-che/theia-remote: [lint] yarn lint exited with code 0
+@eclipse-che/theia-remote: [format] yarn format exited with code 0
+@eclipse-che/theia-preferences-provider-extension: [format] skip format check
+@eclipse-che/theia-preferences-provider-extension: [lint] skip lint check
+@eclipse-che/theia-preferences-provider-extension: [format] yarn format exited with code 0
+@eclipse-che/theia-preferences-provider-extension: [lint] yarn lint exited with code 0
+@eclipse-che/theia-about: [compile] yarn compile exited with code 0
+@eclipse-che/theia-user-preferences-synchronizer: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-user-preferences-synchronizer: [compile] $ tsc
+@eclipse-che/theia-user-preferences-synchronizer: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-user-preferences-synchronizer: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-user-preferences-synchronizer: [format] skip format check
+@eclipse-che/theia-user-preferences-synchronizer: [format] yarn format exited with code 0
+@eclipse-che/theia-user-preferences-synchronizer: [lint] skip lint check
+@eclipse-che/theia-user-preferences-synchronizer: [lint] yarn lint exited with code 0
+@eclipse-che/theia-mini-browser: [compile] yarn compile exited with code 0
+@eclipse-che/theia-preferences-provider-extension: [compile] yarn compile exited with code 0
+@theia/vsx-registry: $ theiaext build
+@theia/vsx-registry: $ concurrently -n compile -c blue "theiaext compile"
+@theia/vsx-registry: [compile] $ tsc -b compile.tsconfig.json
+@theia/vsx-registry: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-user-preferences-synchronizer: [compile] yarn compile exited with code 0
+@eclipse-che/theia-remote: [compile] yarn compile exited with code 0
+@eclipse-che/theia-cli-endpoint: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@eclipse-che/theia-git-provisioner: $ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile"
+@theia/api-samples: $ theiaext build
+@theia/api-samples: $ concurrently -n compile -c blue "theiaext compile"
+@eclipse-che/theia-cli-endpoint: [compile] $ tsc
+@eclipse-che/theia-cli-endpoint: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-cli-endpoint: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@theia/api-samples: [compile] $ tsc -b compile.tsconfig.json
+@eclipse-che/theia-cli-endpoint: [format] skip format check
+@eclipse-che/theia-cli-endpoint: [lint] skip lint check
+@eclipse-che/theia-cli-endpoint: [format] yarn format exited with code 0
+@eclipse-che/theia-git-provisioner: [lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+@eclipse-che/theia-cli-endpoint: [lint] yarn lint exited with code 0
+@eclipse-che/theia-git-provisioner: [format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+@eclipse-che/theia-git-provisioner: [lint] skip lint check
+@eclipse-che/theia-git-provisioner: [lint] yarn lint exited with code 0
+@eclipse-che/theia-git-provisioner: [compile] $ tsc
+@eclipse-che/theia-git-provisioner: [format] skip format check
+@eclipse-che/theia-git-provisioner: [format] yarn format exited with code 0
+@theia/api-samples: [compile] theiaext compile exited with code 0
+@eclipse-che/theia-cli-endpoint: [compile] yarn compile exited with code 0
+@eclipse-che/theia-git-provisioner: [compile] yarn compile exited with code 0
+@eclipse-che/theia-assembly: $ theia build --mode production --config cdn/webpack.config.js --env cdn=./cdn.json --env monacopkg=@theia/monaco-editor-core@0.20.0 && yarn run override-vs-loader
+[91m@eclipse-che/theia-assembly: Failed to resolve module: filenamify
+[0m[91m@eclipse-che/theia-assembly: (node:5983) [DEP_WEBPACK_COMPILATION_ASSETS] DeprecationWarning: Compilation.assets will be frozen in future, all modifications are deprecated.
+[0m[91m@eclipse-che/theia-assembly: BREAKING CHANGE: No more changes should happen to Compilation.assets after sealing the Compilation.\n	Do changes to assets earlier, e. g. in Compilation.hooks.processAssets.\n	Make sure to select an appropriate stage from Compilation.PROCESS_ASSETS_STAGE_*.
+[0m@eclipse-che/theia-assembly: assets by status 333 KiB [cached] 3 assets
+@eclipse-che/theia-assembly: assets by path vs/ 4.04 MiB
+@eclipse-che/theia-assembly:   assets by path vs/editor/ 3.69 MiB 35 assets
+@eclipse-che/theia-assembly:   assets by path vs/base/ 321 KiB 5 assets
+@eclipse-che/theia-assembly:   assets by path vs/*.gz 8.68 KiB 2 assets
+@eclipse-che/theia-assembly:   1 asset
+@eclipse-che/theia-assembly: assets by info 2.49 MiB [immutable]
+@eclipse-che/theia-assembly:   assets by path *.woff2 256 KiB 5 assets
+@eclipse-che/theia-assembly:   assets by status 1.77 MiB [big] 3 assets
+@eclipse-che/theia-assembly: assets by path *.gz 7.13 MiB
+@eclipse-che/theia-assembly:   assets by status 6.67 MiB [big] 4 assets
+@eclipse-che/theia-assembly: asset bundle.js 7.76 MiB [emitted] [minimized] [big] (name: main) 2 related assets
+@eclipse-che/theia-assembly: orphan modules 436 KiB [orphan] 110 modules
+@eclipse-che/theia-assembly: runtime modules 2.1 KiB 7 modules
+@eclipse-che/theia-assembly: javascript modules 15.5 MiB
+@eclipse-che/theia-assembly:   modules by path ../../packages/ 8.71 MiB 1034 modules
+@eclipse-che/theia-assembly:   modules by path ../../node_modules/ 6.08 MiB 711 modules
+@eclipse-che/theia-assembly:   modules by path ../../che-theia/extensions/ 724 KiB 120 modules
+@eclipse-che/theia-assembly:   modules by path ../../dev-packages/application-package/lib/*.js 7.4 KiB 2 modules
+@eclipse-che/theia-assembly: asset modules 122 KiB (javascript) 1.82 MiB (asset)
+@eclipse-che/theia-assembly:   modules by path ../../packages/ 121 KiB (javascript) 64.1 KiB (asset) 92 modules
+@eclipse-che/theia-assembly:   modules by path ../../node_modules/ 504 bytes (javascript) 1.76 MiB (asset) 8 modules
+@eclipse-che/theia-assembly: json modules 298 KiB
+@eclipse-che/theia-assembly:   modules by path ../../packages/core/ 241 KiB 55 modules
+@eclipse-che/theia-assembly:   modules by path ../../packages/monaco/ 25.3 KiB 11 modules
+@eclipse-che/theia-assembly:   modules by path ../../node_modules/ 31.6 KiB 3 modules
+@eclipse-che/theia-assembly:   ../../che-theia/extensions/eclipse-che-theia-about/conf/about-details.json 92 bytes [built] [code generated]
+@eclipse-che/theia-assembly:   assets by status 919 KiB [cached] 1 asset
+@eclipse-che/theia-assembly:   orphan modules 18.7 KiB [orphan] 14 modules
+@eclipse-che/theia-assembly:   runtime modules 1010 bytes 5 modules
+@eclipse-che/theia-assembly:   modules by path ../../packages/ 1.43 MiB
+@eclipse-che/theia-assembly:     modules by path ../../packages/plugin-ext/ 1.05 MiB 103 modules
+@eclipse-che/theia-assembly:     modules by path ../../packages/core/ 326 KiB 38 modules
+@eclipse-che/theia-assembly:     modules by path ../../packages/callhierarchy/lib/common/*.js 36.5 KiB 3 modules
+@eclipse-che/theia-assembly:     ../../packages/filesystem/lib/common/files.js 16 KiB [built] [code generated]
+@eclipse-che/theia-assembly:     ../../packages/debug/lib/node/debug-adapter-session.js 8.54 KiB [built] [code generated]
+@eclipse-che/theia-assembly:   modules by path ../../node_modules/ 433 KiB
+@eclipse-che/theia-assembly:     modules by path ../../node_modules/@babel/runtime/helpers/ 10.4 KiB 21 modules
+@eclipse-che/theia-assembly:     modules by path ../../node_modules/vscode-languageserver-protocol/ 112 KiB 16 modules
+@eclipse-che/theia-assembly:     modules by path ../../node_modules/vscode-jsonrpc/lib/*.js 92 KiB 10 modules
+@eclipse-che/theia-assembly:     modules by path ../../node_modules/vscode-ws-jsonrpc/lib/ 12.2 KiB 8 modules
+@eclipse-che/theia-assembly:     modules by path ../../node_modules/@phosphor/coreutils/lib/*.js 16.2 KiB 7 modules
+@eclipse-che/theia-assembly:   10 modules
+@eclipse-che/theia-assembly:     
+@eclipse-che/theia-assembly:   WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly:   ../../packages/core/lib/common/cancellation.js -> ../../packages/core/lib/common/event.js -> ../../packages/core/lib/common/cancellation.js
+@eclipse-che/theia-assembly:   WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly:   ../../packages/core/lib/common/event.js -> ../../packages/core/lib/common/cancellation.js -> ../../packages/core/lib/common/event.js
+@eclipse-che/theia-assembly:   WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly:   ../../packages/plugin-ext/lib/common/rpc-protocol.js -> ../../packages/plugin-ext/lib/plugin/types-impl.js -> ../../packages/plugin-ext/lib/common/rpc-protocol.js
+@eclipse-che/theia-assembly:   WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly:   ../../packages/plugin-ext/lib/plugin/types-impl.js -> ../../packages/plugin-ext/lib/common/rpc-protocol.js -> ../../packages/plugin-ext/lib/plugin/types-impl.js
+@eclipse-che/theia-assembly:   Child worker-loader /home/theia-dev/theia-source-code/node_modules/source-map-loader/dist/cjs.js!/home/theia-dev/theia-source-code/packages/plugin-ext/lib/hosted/browser/worker/worker-main.js compiled with 4 warnings
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/decorator_utils.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/decorator_utils.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/decorator_utils.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 38:24-63
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/inject.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/inject.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/inject.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 21:15-45
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/injectable.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/injectable.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/injectable.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 15:19-53
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/multi_inject.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/multi_inject.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/multi_inject.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 28:21-57
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/named.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/named.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/named.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 19:14-43
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/optional.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/optional.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/optional.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 24:17-49
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/post_construct.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/post_construct.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/post_construct.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 32:23-61
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/tagged.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/tagged.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/tagged.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 17:15-45
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/target_name.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/target_name.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/target_name.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 30:20-55
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/annotation/unmanaged.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/unmanaged.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/annotation/unmanaged.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 26:18-51
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/bindings/binding.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/bindings/binding.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/bindings/binding.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 45:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/bindings/binding_count.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/bindings/binding_count.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/bindings/binding_count.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 4:22-58
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/constants/error_msgs.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/constants/error_msgs.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/constants/error_msgs.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 46:17-51
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/constants/literal_types.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/constants/literal_types.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/constants/literal_types.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 8:22-58
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/constants/metadata_keys.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/constants/metadata_keys.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/constants/metadata_keys.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 4:11-47
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/container/container.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/container.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/container.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/container/container_module.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/container_module.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/container_module.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 12:25-64
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/container/container_snapshot.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/container_snapshot.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/container_snapshot.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 55:27-58
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/container/lookup.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/lookup.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/container/lookup.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 56:15-34
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/inversify.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/inversify.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/inversify.ts'
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/context.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/context.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/context.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 10:16-36
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/metadata.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/metadata.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/metadata.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/annotation/tagged.js 4:17-48
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 17:15-45
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/metadata_reader.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/metadata_reader.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/metadata_reader.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 34:24-61
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/plan.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/plan.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/plan.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 12:13-30
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/planner.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/planner.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/planner.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/queryable_string.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/queryable_string.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/queryable_string.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/target.js 7:25-54
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 15:15-34
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/reflection_utils.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/reflection_utils.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/reflection_utils.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 13:25-54
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/request.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/request.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/request.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 14:16-36
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/planning/target.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/target.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/planning/target.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 15:15-34
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/resolution/instantiation.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/resolution/instantiation.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/resolution/instantiation.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/resolution/resolver.js 8:22-48
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 51:17-50
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/resolution/resolver.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/resolution/resolver.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/resolution/resolver.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 51:17-50
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/syntax/binding_in_syntax.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_in_syntax.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_in_syntax.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_in_when_on_syntax.js 4:26-56
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_to_syntax.js 6:34-72
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 52:26-64
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/syntax/binding_in_when_on_syntax.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_in_when_on_syntax.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_in_when_on_syntax.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_to_syntax.js 6:34-72
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 52:26-64
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/syntax/binding_on_syntax.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_on_syntax.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_on_syntax.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_when_on_syntax.js 4:26-56
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_to_syntax.js 7:31-66
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 52:26-64
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/syntax/binding_to_syntax.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_to_syntax.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_to_syntax.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 52:26-64
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/syntax/binding_when_on_syntax.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_when_on_syntax.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_when_on_syntax.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_to_syntax.js 7:31-66
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 52:26-64
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/syntax/binding_when_syntax.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_when_syntax.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/binding_when_syntax.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_when_on_syntax.js 5:28-60
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/syntax/binding_to_syntax.js 7:31-66
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 52:26-64
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/syntax/constraint_helpers.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/constraint_helpers.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/syntax/constraint_helpers.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 40:27-65
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/utils/binding_utils.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/binding_utils.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/binding_utils.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 47:22-54
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/utils/exceptions.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/exceptions.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/exceptions.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/planning/planner.js 8:19-49
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/container/container.js 50:16-46
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 6:18-50
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/utils/id.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/id.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/id.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 36:11-32
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/inversify/lib/utils/serialization.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/serialization.ts' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/inversify/src/utils/serialization.ts'
+@eclipse-che/theia-assembly:  @ ../../node_modules/inversify/lib/inversify.js 45:22-54
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 5:22-42
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/vscode-textmate/release/main.js 23:15-27
+@eclipse-che/theia-assembly: Critical dependency: the request of a dependency is an expression
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/textmate/monaco-textmate-service.js 76:24-50
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/textmate/monaco-textmate-frontend-bindings.js 59:32-68
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/monaco-frontend-module.js 75:42-97
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/monaco-browser-module.js 25:55-90
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 63:47-105
+@eclipse-che/theia-assembly: WARNING in ../../node_modules/vscode-textmate/release/main.js
+@eclipse-che/theia-assembly: Module Warning (from ../../node_modules/source-map-loader/dist/cjs.js):
+@eclipse-che/theia-assembly: Failed to parse source map from '/home/theia-dev/theia-source-code/node_modules/vscode-textmate/release/main.js.map' file: Error: ENOENT: no such file or directory, open '/home/theia-dev/theia-source-code/node_modules/vscode-textmate/release/main.js.map'
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/textmate/monaco-textmate-service.js 76:24-50
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/textmate/monaco-textmate-frontend-bindings.js 59:32-68
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/monaco-frontend-module.js 75:42-97
+@eclipse-che/theia-assembly:  @ ../../packages/monaco/lib/browser/monaco-browser-module.js 25:55-90
+@eclipse-che/theia-assembly:  @ ./src-gen/frontend/index.js 63:47-105
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../che-theia/extensions/eclipse-che-theia-workspace/lib/browser/che-workspace-contribution.js -> ../../che-theia/extensions/eclipse-che-theia-workspace/lib/browser/che-workspace-controller.js -> ../../che-theia/extensions/eclipse-che-theia-workspace/lib/browser/che-workspace-contribution.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../che-theia/extensions/eclipse-che-theia-workspace/lib/browser/che-workspace-controller.js -> ../../che-theia/extensions/eclipse-che-theia-workspace/lib/browser/che-workspace-contribution.js -> ../../che-theia/extensions/eclipse-che-theia-workspace/lib/browser/che-workspace-controller.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/quick-open/index.js -> ../../packages/core/lib/browser/quick-open/quick-command-service.js -> ../../packages/core/lib/browser/quick-open/quick-command-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/quick-view-service.js -> ../../packages/core/lib/browser/quick-open/index.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/quick-open/quick-command-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/quick-view-service.js -> ../../packages/core/lib/browser/quick-open/index.js -> ../../packages/core/lib/browser/quick-open/quick-command-service.js -> ../../packages/core/lib/browser/quick-open/quick-command-contribution.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/quick-open/quick-command-service.js -> ../../packages/core/lib/browser/quick-open/quick-command-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/quick-view-service.js -> ../../packages/core/lib/browser/quick-open/index.js -> ../../packages/core/lib/browser/quick-open/quick-command-service.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/quick-view-service.js -> ../../packages/core/lib/browser/quick-open/index.js -> ../../packages/core/lib/browser/quick-open/quick-command-service.js -> ../../packages/core/lib/browser/quick-open/quick-command-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/quick-view-service.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/tree/tree-widget-selection.js -> ../../packages/core/lib/browser/tree/tree-widget.js -> ../../packages/core/lib/browser/tree/tree-widget-selection.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/tree/tree-widget.js -> ../../packages/core/lib/browser/tree/tree-widget-selection.js -> ../../packages/core/lib/browser/tree/tree-widget.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/browser/widget-open-handler.js -> ../../packages/core/lib/browser/shell/index.js -> ../../packages/core/lib/browser/shell/view-contribution.js -> ../../packages/core/lib/browser/common-frontend-contribution.js -> ../../packages/core/lib/browser/navigatable.js -> ../../packages/core/lib/browser/widget-open-handler.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/common/cancellation.js -> ../../packages/core/lib/common/event.js -> ../../packages/core/lib/common/cancellation.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/core/lib/common/event.js -> ../../packages/core/lib/common/cancellation.js -> ../../packages/core/lib/common/event.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/debug/lib/browser/debug-frontend-application-contribution.js -> ../../packages/debug/lib/browser/view/debug-widget.js -> ../../packages/debug/lib/browser/view/debug-configuration-widget.js -> ../../packages/debug/lib/browser/debug-frontend-application-contribution.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/debug/lib/browser/view/debug-configuration-widget.js -> ../../packages/debug/lib/browser/debug-frontend-application-contribution.js -> ../../packages/debug/lib/browser/view/debug-widget.js -> ../../packages/debug/lib/browser/view/debug-configuration-widget.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/debug/lib/browser/view/debug-widget.js -> ../../packages/debug/lib/browser/view/debug-configuration-widget.js -> ../../packages/debug/lib/browser/debug-frontend-application-contribution.js -> ../../packages/debug/lib/browser/view/debug-widget.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/navigator/lib/browser/navigator-contribution.js -> ../../packages/navigator/lib/browser/navigator-widget-factory.js -> ../../packages/navigator/lib/browser/navigator-widget.js -> ../../packages/navigator/lib/browser/navigator-contribution.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/navigator/lib/browser/navigator-keybinding-context.js -> ../../packages/navigator/lib/browser/navigator-widget.js -> ../../packages/navigator/lib/browser/navigator-contribution.js -> ../../packages/navigator/lib/browser/navigator-keybinding-context.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/navigator/lib/browser/navigator-widget-factory.js -> ../../packages/navigator/lib/browser/navigator-widget.js -> ../../packages/navigator/lib/browser/navigator-contribution.js -> ../../packages/navigator/lib/browser/navigator-widget-factory.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/navigator/lib/browser/navigator-widget.js -> ../../packages/navigator/lib/browser/navigator-contribution.js -> ../../packages/navigator/lib/browser/navigator-widget-factory.js -> ../../packages/navigator/lib/browser/navigator-widget.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/plugin-ext/lib/common/rpc-protocol.js -> ../../packages/plugin-ext/lib/plugin/types-impl.js -> ../../packages/plugin-ext/lib/common/rpc-protocol.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/plugin-ext/lib/hosted/browser/hosted-plugin.js -> ../../packages/plugin-ext/lib/main/browser/main-context.js -> ../../packages/plugin-ext/lib/main/browser/webviews-main.js -> ../../packages/plugin-ext/lib/hosted/browser/hosted-plugin.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/plugin-ext/lib/main/browser/custom-editors/custom-editors-main.js -> ../../packages/plugin-ext/lib/hosted/browser/hosted-plugin.js -> ../../packages/plugin-ext/lib/main/browser/main-context.js -> ../../packages/plugin-ext/lib/main/browser/custom-editors/custom-editors-main.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/plugin-ext/lib/main/browser/debug/debug-main.js -> ../../packages/plugin-ext/lib/hosted/browser/hosted-plugin.js -> ../../packages/plugin-ext/lib/main/browser/main-context.js -> ../../packages/plugin-ext/lib/main/browser/debug/debug-main.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/plugin-ext/lib/main/browser/main-context.js -> ../../packages/plugin-ext/lib/main/browser/webviews-main.js -> ../../packages/plugin-ext/lib/hosted/browser/hosted-plugin.js -> ../../packages/plugin-ext/lib/main/browser/main-context.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/plugin-ext/lib/main/browser/webviews-main.js -> ../../packages/plugin-ext/lib/hosted/browser/hosted-plugin.js -> ../../packages/plugin-ext/lib/main/browser/main-context.js -> ../../packages/plugin-ext/lib/main/browser/webviews-main.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/plugin-ext/lib/plugin/types-impl.js -> ../../packages/plugin-ext/lib/common/rpc-protocol.js -> ../../packages/plugin-ext/lib/plugin/types-impl.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/timeline/lib/browser/timeline-contribution.js -> ../../packages/timeline/lib/browser/timeline-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-model.js -> ../../packages/timeline/lib/browser/timeline-contribution.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/timeline/lib/browser/timeline-tree-model.js -> ../../packages/timeline/lib/browser/timeline-contribution.js -> ../../packages/timeline/lib/browser/timeline-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-model.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/timeline/lib/browser/timeline-tree-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-model.js -> ../../packages/timeline/lib/browser/timeline-contribution.js -> ../../packages/timeline/lib/browser/timeline-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-widget.js
+@eclipse-che/theia-assembly: WARNING in Circular dependency detected:
+@eclipse-che/theia-assembly: ../../packages/timeline/lib/browser/timeline-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-widget.js -> ../../packages/timeline/lib/browser/timeline-tree-model.js -> ../../packages/timeline/lib/browser/timeline-contribution.js -> ../../packages/timeline/lib/browser/timeline-widget.js
+@eclipse-che/theia-assembly: WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+@eclipse-che/theia-assembly: This can impact web performance.
+@eclipse-che/theia-assembly: Assets: 
+@eclipse-che/theia-assembly:   worker-ext.84427a1141dd98e53b95.js (919 KiB)
+@eclipse-che/theia-assembly:   bundle.js (7.76 MiB)
+@eclipse-che/theia-assembly:   c1e38fd9e0e74ba58f7a.svg?v=4.7.0 (434 KiB)
+@eclipse-che/theia-assembly:   6e3d5ec6699a8d147d29.wasm (457 KiB)
+@eclipse-che/theia-assembly:   vs/editor/editor.main.js (2.42 MiB)
+@eclipse-che/theia-assembly:   worker-ext.84427a1141dd98e53b95.js.gz (304 KiB)
+@eclipse-che/theia-assembly:   vs/editor/editor.main.js.gz (575 KiB)
+@eclipse-che/theia-assembly:   worker-ext.84427a1141dd98e53b95.js.map.gz (525 KiB)
+@eclipse-che/theia-assembly:   bundle.js.gz (1.81 MiB)
+@eclipse-che/theia-assembly:   bundle.js.map.gz (4.05 MiB)
+@eclipse-che/theia-assembly: WARNING in entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+@eclipse-che/theia-assembly: Entrypoints:
+@eclipse-che/theia-assembly:   main (7.76 MiB)
+@eclipse-che/theia-assembly:       bundle.js
+@eclipse-che/theia-assembly: WARNING in webpack performance recommendations: 
+@eclipse-che/theia-assembly: You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+@eclipse-che/theia-assembly: For more info visit https://webpack.js.org/guides/code-splitting/
+@eclipse-che/theia-assembly: 44 warnings have detailed information that is not shown.
+@eclipse-che/theia-assembly: Use 'stats.errorDetails: true' resp. '--stats-error-details' to show it.
+@eclipse-che/theia-assembly: webpack 5.38.1 compiled with 84 warnings in 543235 ms
+@eclipse-che/theia-assembly: $ override-vs-loader
+[91mlerna success run Ran npm script 'build' in packages:
+lerna success - @theia/application-manager
+lerna success - @theia/application-package
+lerna success - @theia/cli
+lerna success - @theia/ovsx-client
+lerna success - @eclipse-che/che-theia-hosted-plugin-manager-extension
+lerna [0m[91msuccess - @eclipse-che/theia-about
+lerna success - @eclipse-che/theia-activity-tracker
+lerna success - @eclipse-che/theia-cli-endpoint
+lerna success - @eclipse-che/theia-dashboard-extension
+lerna success - @eclipse-che/theia-file-sync-tracker
+lerna success - @eclipse-che/theia-git-provisioner
+lerna success - @eclipse-che/theia-logging
+lerna [0m[91msuccess - @eclipse-che/theia-messaging
+lerna [0m[91msuccess - @eclipse-che/theia-mini-browser
+lerna success - @eclipse-che/theia-plugin-ext
+[0m[91mlerna success - @eclipse-che/theia-remote
+lerna [0m[91msuccess - @eclipse-che/theia-preferences-provider-extension
+lerna success[0m[91m - @eclipse-che/theia-remote-api
+lerna[0m[91m success - @eclipse-che/theia-remote-impl-che-server
+lerna [0m[91msuccess - @eclipse-che/theia-remote-impl-k8s
+lerna success - @eclipse-che/theia-terminal
+lerna success - @eclipse-che/theia-user-preferences-synchronizer
+lerna success - @eclipse-che/theia-workspace-extension
+lerna success - @theia/bulk-edit
+lerna success - @theia/callhierarchy
+lerna success - @theia/console
+lerna success[0m[91m - @theia/core
+lerna [0m[91msuccess[0m[91m - @theia/debug
+lerna[0m[91m success[0m[91m - @theia/editor-preview
+[0m[91mlerna [0m[91msuccess[0m[91m - @theia/editor
+lerna success[0m[91m - @theia/external-terminal
+lerna [0m[91msuccess[0m[91m - @theia/file-search
+lerna [0m[91msuccess - @theia/filesystem
+[0m[91mlerna[0m[91m success[0m[91m - @theia/getting-started
+lerna[0m[91m success[0m[91m - @theia/keymaps
+lerna[0m[91m success[0m[91m - @theia/markers
+lerna [0m[91msuccess[0m[91m - @theia/messages
+lerna[0m[91m success[0m[91m - @theia/metrics
+lerna[0m[91m success[0m[91m - @theia/mini-browser
+[0m[91mlerna success[0m[91m - @theia/monaco
+lerna [0m[91msuccess[0m[91m - @theia/navigator
+lerna [0m[91msuccess[0m[91m - @theia/outline-view
+lerna[0m[91m success[0m[91m - @theia/output
+lerna[0m[91m success[0m[91m - @theia/plugin-dev
+[0m[91mlerna [0m[91msuccess[0m[91m - @theia/plugin-ext-vscode
+lerna success[0m[91m - @theia/plugin-ext
+lerna success[0m[91m - @theia/plugin-metrics
+lerna[0m[91m success[0m[91m - @theia/plugin
+lerna[0m[91m success[0m[91m - @theia/preferences
+[0m[91mlerna success[0m[91m - @theia/preview
+lerna[0m[91m success[0m[91m - @theia/process
+lerna success[0m[91m - @theia/property-view
+lerna success[0m[91m - @theia/scm-extra
+lerna[0m[91m success[0m[91m - @theia/scm
+lerna[0m[91m success[0m[91m - @theia/search-in-workspace
+[0m[91mlerna [0m[91msuccess[0m[91m - @theia/task
+lerna success[0m[91m - @theia/terminal
+lerna success[0m[91m - @theia/timeline
+lerna [0m[91msuccess - @theia/typehierarchy
+lerna[0m[91m success[0m[91m - @theia/userstorage
+lerna [0m[91msuccess - @theia/variable-resolver
+lerna[0m[91m success[0m[91m - @theia/vsx-registry
+lerna [0m[91msuccess - @theia/workspace
+lerna[0m[91m success[0m[91m - @theia/api-samples
+lerna[0m[91m success - @eclipse-che/theia-assembly
+[0mDone in 1500.00s.
+yarn run v1.22.5
+$ theia check:hoisted -s
+🔍  Analyzing hoisted dependencies in the Theia extensions...
+📖  Summary:
+The following dependency issues were detected in '@theia/@che-che-theia-hosted-plugin-manager-extension':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-about':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-activity-tracker':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-cli-endpoint':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-dashboard':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-file-sync-tracker':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-git-provisioner':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-logging':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-messaging':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-mini-browser':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-plugin':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-plugin-ext':
+ - error: Dependency '@webassemblyjs' was not hoisted to the root 'node_modules' folder.
+ - error: Dependency 'cacache' [12.0.4] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 11.3.3 at '/home/theia-dev/theia-source-code/node_modules/cacache'.
+ - error: Dependency 'chokidar' [3.5.2] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.3.0 at '/home/theia-dev/theia-source-code/node_modules/chokidar'.
+ - error: Dependency 'cross-spawn' [6.0.5] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 7.0.3 at '/home/theia-dev/theia-source-code/node_modules/cross-spawn'.
+ - error: Dependency 'eslint-scope' [4.0.3] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 5.1.1 at '/home/theia-dev/theia-source-code/node_modules/eslint-scope'.
+ - error: Dependency 'find-cache-dir' [2.1.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.3.1 at '/home/theia-dev/theia-source-code/node_modules/find-cache-dir'.
+ - error: Dependency 'find-up' [3.0.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.1.0 at '/home/theia-dev/theia-source-code/node_modules/find-up'.
+ - error: Dependency 'js-yaml' [3.13.1] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.14.1 at '/home/theia-dev/theia-source-code/node_modules/js-yaml'.
+ - error: Dependency 'loader-runner' [2.4.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 4.2.0 at '/home/theia-dev/theia-source-code/node_modules/loader-runner'.
+ - error: Dependency 'locate-path' [3.0.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.0.0 at '/home/theia-dev/theia-source-code/node_modules/locate-path'.
+ - error: Dependency 'lru-cache' [5.1.1] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 4.1.5 at '/home/theia-dev/theia-source-code/node_modules/lru-cache'.
+ - error: Dependency 'make-dir' [2.1.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.1.0 at '/home/theia-dev/theia-source-code/node_modules/make-dir'.
+ - error: Dependency 'memory-fs' [0.4.1] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 0.5.0 at '/home/theia-dev/theia-source-code/node_modules/memory-fs'.
+ - error: Dependency 'p-locate' [3.0.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.0.0 at '/home/theia-dev/theia-source-code/node_modules/p-locate'.
+ - error: Dependency 'path-key' [2.0.1] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 1.0.0 at '/home/theia-dev/theia-source-code/node_modules/path-key'.
+ - error: Dependency 'pify' [4.0.1] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.3.0 at '/home/theia-dev/theia-source-code/node_modules/pify'.
+ - error: Dependency 'readdirp' [3.6.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.2.0 at '/home/theia-dev/theia-source-code/node_modules/readdirp'.
+ - error: Dependency 'schema-utils' [1.0.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.0.0 at '/home/theia-dev/theia-source-code/node_modules/schema-utils'.
+ - error: Dependency 'serialize-javascript' [4.0.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 5.0.1 at '/home/theia-dev/theia-source-code/node_modules/serialize-javascript'.
+ - error: Dependency 'supports-color' [6.1.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.2.3 at '/home/theia-dev/theia-source-code/node_modules/supports-color'.
+ - error: Dependency 'tapable' [1.1.3] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.2.0 at '/home/theia-dev/theia-source-code/node_modules/tapable'.
+ - error: Dependency 'terser-webpack-plugin' [1.4.5] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 5.1.3 at '/home/theia-dev/theia-source-code/node_modules/terser-webpack-plugin'.
+ - error: Dependency 'watchpack' [1.7.5] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.2.0 at '/home/theia-dev/theia-source-code/node_modules/watchpack'.
+ - error: Dependency 'webpack' [4.46.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 5.38.1 at '/home/theia-dev/theia-source-code/node_modules/webpack'.
+ - error: Dependency 'webpack-cli' [3.3.12] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 4.7.0 at '/home/theia-dev/theia-source-code/node_modules/webpack-cli'.
+ - error: Dependency 'yallist' [3.1.1] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 4.0.0 at '/home/theia-dev/theia-source-code/node_modules/yallist'.
+ - error: Dependency 'yargs' [13.3.2] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 15.4.1 at '/home/theia-dev/theia-source-code/node_modules/yargs'.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-preferences-provider-extension':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-remote-api':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-remote-impl-che-server':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-remote-impl-k8s':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-terminal':
+ - warn: Does not have 'node_modules' folder.
+The following dependency issues were detected in '@theia/@che-eclipse-che-theia-workspace':
+ - error: Dependency 'js-yaml' [3.13.1] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.14.1 at '/home/theia-dev/theia-source-code/node_modules/js-yaml'.
+The following dependency issues were detected in '@theia/core':
+ - error: Dependency 'debug' [3.2.7] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 4.3.1 at '/home/theia-dev/theia-source-code/node_modules/debug'.
+ - error: Dependency 'drivelist' [9.2.4] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 9.0.2 at '/home/theia-dev/theia-source-code/node_modules/drivelist'.
+ - error: Dependency 'iconv-lite' [0.6.3] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 0.4.24 at '/home/theia-dev/theia-source-code/node_modules/iconv-lite'.
+ - error: Dependency 'vscode-uri' [2.1.2] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.1.1 at '/home/theia-dev/theia-source-code/node_modules/vscode-uri'.
+The following dependency issues were detected in '@theia/filesystem':
+ - error: Dependency 'pump' [1.0.3] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 3.0.0 at '/home/theia-dev/theia-source-code/node_modules/pump'.
+ - error: Dependency 'tar-fs' [1.16.3] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.1.1 at '/home/theia-dev/theia-source-code/node_modules/tar-fs'.
+The following dependency issues were detected in '@theia/workspace':
+ - error: Dependency 'moment' [2.24.0] was not hoisted to the root 'node_modules' folder. The same dependency already exists with version 2.29.1 at '/home/theia-dev/theia-source-code/node_modules/moment'.
+⚠️  This is a reminder to fix the dependency issues.
+Done in 50.53s.
+yarn run v1.22.5
+$ theia download:plugins
+[91m--- downloading plugins ---
+[0m[91m+ vscode-builtin-log: downloaded successfully 
++ vscode-builtin-theme-monokai-dimmed: downloaded successfully 
++ vscode-builtin-theme-quietlight: downloaded successfully 
++ vscode-builtin-theme-monokai: downloaded successfully 
++ vscode-builtin-theme-tomorrow-night-blue: downloaded successfully 
++ vscode-builtin-pug: downloaded successfully 
+[0m[91m+ vscode-builtin-handlebars: downloaded successfully 
++ vscode-builtin-less: downloaded successfully 
++ vscode-builtin-docker: downloaded successfully 
++ vscode-builtin-hlsl: downloaded successfully 
+[0m[91m+ vscode-builtin-theme-kimbie-dark: downloaded successfully 
++ vscode-builtin-go: downloaded successfully 
++ vscode-builtin-razor: downloaded successfully 
++ vscode-builtin-rust: downloaded successfully 
+[0m[91m+ vscode-builtin-sql: downloaded successfully 
+[0m[91m+ vscode-builtin-fsharp: downloaded successfully 
++ vscode-builtin-java: downloaded successfully 
++ vscode-builtin-coffeescript: downloaded successfully 
++ vscode-builtin-lua: downloaded successfully 
++ vscode-builtin-ruby: downloaded successfully 
++ vscode-builtin-shaderlab: downloaded successfully 
++ vscode-builtin-ini: downloaded successfully 
++ vscode-builtin-theme-abyss: downloaded successfully 
++ vscode-builtin-css: downloaded successfully 
++ vscode-builtin-json: downloaded successfully 
++ vscode-builtin-groovy: downloaded successfully 
++ vscode-builtin-shellscript: downloaded successfully 
++ vscode-builtin-markdown: downloaded successfully 
++ vscode-builtin-r: downloaded successfully 
+[0m[91m+ vscode-builtin-vb: downloaded successfully 
++ vscode-builtin-theme-red: downloaded successfully 
++ vscode-builtin-theme-solarized-dark: downloaded successfully 
++ vscode-builtin-csharp: downloaded successfully 
+[0m[91m+ vscode-builtin-perl: downloaded successfully 
+[0m[91m+ vscode-builtin-html: downloaded successfully 
+[0m[91m+ vscode-builtin-gulp: downloaded successfully 
+[0m[91m+ vscode-builtin-swift: downloaded successfully 
+[0m[91m+ vscode-builtin-scss: downloaded successfully 
+[0m[91m+ vscode-builtin-grunt: downloaded successfully 
++ vscode-builtin-jake: downloaded successfully 
+[0m[91m+ vscode-builtin-python: downloaded successfully 
++ vscode-builtin-yaml: downloaded successfully 
++ vscode-builtin-theme-solarized-light: downloaded successfully 
+[0m[91m+ vscode-builtin-make: downloaded successfully 
+[0m[91m+ vscode-builtin-objective-c: downloaded successfully 
+[0m[91m+ vscode-builtin-clojure: downloaded successfully 
+[0m[91m+ vscode-builtin-bat: downloaded successfully 
++ vscode-builtin-powershell: downloaded successfully 
+[0m[91m+ vscode-builtin-xml: downloaded successfully 
+[0m[91m+ vscode-builtin-debug-auto-launch: downloaded successfully 
+[0m[91m+ vscode-builtin-configuration-editing: downloaded successfully 
+[0m[91m+ vscode-builtin-javascript: downloaded successfully 
++ vscode-github: downloaded successfully 
++ vscode-builtin-php: downloaded successfully 
+[0m[91m+ vscode-builtin-icon-theme-seti: downloaded successfully 
+[0m[91m+ vscode-builtin-typescript: downloaded successfully 
+[0m[91m+ vscode-builtin-merge-conflicts: downloaded successfully 
+[0m[91m+ vscode-builtin-npm: downloaded successfully 
+[0m[91m+ vscode-builtin-theme-defaults: downloaded successfully 
+[0m[91m+ vscode-builtin-cpp: downloaded successfully 
+[0m[91m+ vscode-references-view: downloaded successfully 
+[0m[91m+ vscode-builtin-json-language-features: downloaded successfully 
+[0m[91m+ vscode-builtin-markdown-language-features: downloaded successfully 
+[0m[91m+ vscode-builtin-css-language-features: downloaded successfully 
+[0m[91m+ vscode-git: downloaded successfully 
+[0m[91m+ vscode-builtin-js-debug: downloaded successfully 
+[0m[91m+ vscode-builtin-emmet: downloaded successfully 
+[0m[91m+ vscode-builtin-html-language-features: downloaded successfully 
+[0mDone in 36.49s.
+Done in 3029.97s.
+Removing intermediate container 14f37dc90a1f
+ ---> 8e18f0c9718e
+Step 24/40 : RUN che-theia production
+ ---> Running in 73dd11930b17
+🗂  Get dependencies...
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency font-awesome
+ --> Excluding the dependency react
+ --> Excluding the dependency react-dom
+ --> Excluding the dependency react-virtualized
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco-editor-core
+ --> Excluding the dependency onigasm
+ --> Excluding the dependency oniguruma
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+ --> Excluding the dependency @theia/monaco
+🗃  Resolving files...
+✍️  Copying files...
+✂️  Cleaning-up files...
+yarn autoclean v1.22.5
+[1/1] Cleaning modules...
+info Removed 5287 files
+info Saved 21.48 MB.
+Done in 42.51s.
+
+Removed :105848 KiB
+🎉  Theia production-ready available in production.
+Removing intermediate container 73dd11930b17
+ ---> 0d52eac64baa
+Step 25/40 : RUN if [ -z $GITHUB_TOKEN ]; then unset GITHUB_TOKEN; fi &&     cd plugins && ./foreach_yarn
+ ---> Running in 5ec04dd125ce
+
+✍️  Process plugin containers-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/containers-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+[3/5] Fetching packages...
+[91mwarning url-loader@1.1.2: Invalid bin field for "url-loader".
+[0minfo fsevents@2.3.2: The platform "linux" is incompatible with this module.
+info "fsevents@2.3.2" is an optional dependency and failed compatibility check. Excluding it from installation.
+[91mwarning @eclipse-che/theia-containers-plugin@0.0.2: The engine "theiaPlugin" appears to be invalid.
+warning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/github-auth-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/recommendations-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/theia-ssh-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning task-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/telemetry-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/welcome-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+warning @eclipse-che/workspace-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0minfo fsevents@1.2.13: The platform "linux" is incompatible with this module.
+info "fsevents@1.2.13" is an optional dependency and failed compatibility check. Excluding it from installation.
+[4/5] Linking dependencies...
+[91mwarning " > eslint-plugin-sonarjs@0.5.0" has incorrect peer dependency "eslint@^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0".
+[0m[91mwarning "workspace-aggregator-b369a894-00e9-4d8b-93bf-e141c33f3134 > @eclipse-che/che-theia-hosted-plugin-manager-extension > @theia/plugin-ext > @theia/messages > react-perfect-scrollbar@1.5.8" has unmet peer dependency "react@>=16.3.3".
+warning "workspace-aggregator-b369a894-00e9-4d8b-93bf-e141c33f3134 > @eclipse-che/che-theia-hosted-plugin-manager-extension > @theia/plugin-ext > @theia/messages > react-perfect-scrollbar@1.5.8" has unmet peer dependency "react-dom@>=16.3.3".
+warning "workspace-aggregator-b369a894-00e9-4d8b-93bf-e141c33f3134 > @eclipse-che/che-theia-hosted-plugin-manager-extension > @theia/plugin-ext > @theia/scm > react-autosize-textarea@7.1.0" has unmet peer dependency "react@^0.14.0 || ^15.0.0 || ^16.0.0".
+warning "workspace-aggregator-b369a894-00e9-4d8b-93bf-e141c33f3134 > @eclipse-che/che-theia-hosted-plugin-manager-extension > @theia/plugin-ext > @theia/scm > react-autosize-textarea@7.1.0" has unmet peer dependency "react-dom@^0.14.0 || ^15.0.0 || ^16.0.0".
+[0m[5/5] Building fresh packages...
+success Saved lockfile.
+$ yarn clean && yarn build && yarn test
+yarn run v1.22.5
+[91mwarning @eclipse-che/theia-containers-plugin@0.0.2: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.72s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/theia-containers-plugin@0.0.2: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[format] warning @eclipse-che/theia-containers-plugin@0.0.2: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[compile] warning @eclipse-che/theia-containers-plugin@0.0.2: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[lint] warning @eclipse-che/theia-containers-plugin@0.0.2: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[format] skip format check
+[format] yarn format exited with code 0
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_theia_containers_plugin.theia
+Done in 100.71s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/theia-containers-plugin@0.0.2: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.93s.
+Done in 1433.05s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/containers-plugin/eclipse_che_theia_containers_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_theia_containers_plugin.theia
+
+✍️  Process plugin ext-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/ext-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn lint:fix && yarn test
+yarn run v1.22.5
+[91mwarning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.73s.
+yarn run v1.22.5
+[91mwarning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[compile] warning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[lint] warning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[format] warning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[format] skip format check
+[lint] skip lint check
+[format] yarn format exited with code 0
+[lint] yarn lint exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: ext_plugin.theia
+Done in 11.94s.
+yarn run v1.22.5
+[91mwarning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ eslint --fix --cache=true --no-error-on-unmatched-pattern=true "{src,tests}/**/*.{ts,tsx}"
+Done in 161.81s.
+yarn run v1.22.5
+[91mwarning ext-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.33s.
+Done in 180.94s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/ext-plugin/ext_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/ext_plugin.theia
+
+✍️  Process plugin foreach_yarn
+
+✍️  Process plugin github-auth-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/github-auth-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn test
+yarn run v1.22.5
+[91mwarning @eclipse-che/github-auth-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.64s.
+yarn run v1.22.5
+$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[91mwarning @eclipse-che/github-auth-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m[format] warning @eclipse-che/github-auth-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[lint] warning @eclipse-che/github-auth-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[compile] warning @eclipse-che/github-auth-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[format] skip format check
+[format] yarn format exited with code 0
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_github_auth_plugin.theia
+Done in 15.50s.
+yarn run v1.22.5
+$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+[91mwarning @eclipse-che/github-auth-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0mskip test
+Done in 0.48s.
+Done in 20.93s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/github-auth-plugin/eclipse_che_github_auth_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_github_auth_plugin.theia
+
+✍️  Process plugin ports-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/ports-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn lint:fix && yarn test
+yarn run v1.22.5
+$ rimraf lib
+[91mwarning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0mDone in 0.84s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[format] warning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[lint] warning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[format] skip format check
+[format] yarn format exited with code 0
+[compile] warning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_ports_plugin.theia
+Done in 14.82s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ eslint --fix --cache=true --no-error-on-unmatched-pattern=true "{src,tests}/**/*.{ts,tsx}"
+Done in 26.00s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/ports-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.29s.
+Done in 46.52s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/ports-plugin/eclipse_che_ports_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_ports_plugin.theia
+
+✍️  Process plugin recommendations-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/recommendations-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn run clean && yarn run build && yarn test
+yarn run v1.22.5
+[91mwarning @eclipse-che/recommendations-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.40s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/recommendations-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[format] warning @eclipse-che/recommendations-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] warning @eclipse-che/recommendations-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[compile] warning @eclipse-che/recommendations-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[format] skip format check
+[format] yarn format exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_recommendations_plugin.theia
+Done in 19.34s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/recommendations-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.20s.
+Done in 23.50s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/recommendations-plugin/eclipse_che_recommendations_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_recommendations_plugin.theia
+
+✍️  Process plugin resource-monitor-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/resource-monitor-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn lint:fix && yarn test
+yarn run v1.22.5
+[91mwarning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.33s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[compile] warning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[lint] warning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ eslint --cache=true --no-error-on-unmatched-pattern=true "{src,tests}/**/*.{ts,tsx}"
+[format] warning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[format] skip format check
+[format] yarn format exited with code 0
+[compile] yarn compile exited with code 0
+[lint] yarn lint exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_resource_monitor_plugin.theia
+Done in 73.74s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ eslint --fix --cache=true --no-error-on-unmatched-pattern=true "{src,tests}/**/*.{ts,tsx}"
+Done in 1.40s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/resource-monitor-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.18s.
+Done in 79.01s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/resource-monitor-plugin/eclipse_che_resource_monitor_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_resource_monitor_plugin.theia
+
+✍️  Process plugin ssh-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/ssh-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn test
+yarn run v1.22.5
+[91mwarning @eclipse-che/theia-ssh-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.23s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/theia-ssh-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[format] warning @eclipse-che/theia-ssh-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[compile] warning @eclipse-che/theia-ssh-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[format] skip format check
+[lint] warning @eclipse-che/theia-ssh-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[format] yarn format exited with code 0
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_theia_ssh_plugin.theia
+Done in 12.04s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/theia-ssh-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.20s.
+Done in 15.54s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/ssh-plugin/eclipse_che_theia_ssh_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_theia_ssh_plugin.theia
+
+✍️  Process plugin task-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/task-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn test
+yarn run v1.22.5
+$ rimraf lib
+[91mwarning task-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0mDone in 0.27s.
+yarn run v1.22.5
+[91mwarning task-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[lint] warning task-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[compile] warning task-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[format] warning task-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[format] skip format check
+[format] yarn format exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: task_plugin.theia
+Done in 15.81s.
+yarn run v1.22.5
+[91mwarning task-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.20s.
+Done in 19.25s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/task-plugin/task_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/task_plugin.theia
+
+✍️  Process plugin telemetry-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/telemetry-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn test
+yarn run v1.22.5
+[91mwarning @eclipse-che/telemetry-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.24s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/telemetry-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[lint] warning @eclipse-che/telemetry-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[compile] warning @eclipse-che/telemetry-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] warning @eclipse-che/telemetry-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[format] skip format check
+[format] yarn format exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_telemetry_plugin.theia
+Done in 11.10s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/telemetry-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.18s.
+Done in 14.53s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/telemetry-plugin/eclipse_che_telemetry_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_telemetry_plugin.theia
+
+✍️  Process plugin vscode-builtin-bat
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-bat VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-bat
+
+✍️  Process plugin vscode-builtin-clojure
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-clojure VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-clojure
+
+✍️  Process plugin vscode-builtin-coffeescript
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-coffeescript VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-coffeescript
+
+✍️  Process plugin vscode-builtin-configuration-editing
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-configuration-editing VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-configuration-editing
+
+✍️  Process plugin vscode-builtin-cpp
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-cpp VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-cpp
+
+✍️  Process plugin vscode-builtin-csharp
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-csharp VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-csharp
+
+✍️  Process plugin vscode-builtin-css
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-css VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-css
+
+✍️  Process plugin vscode-builtin-css-language-features
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-css-language-features VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-css-language-features
+
+✍️  Process plugin vscode-builtin-debug-auto-launch
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-debug-auto-launch VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-debug-auto-launch
+
+✍️  Process plugin vscode-builtin-docker
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-docker VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-docker
+
+✍️  Process plugin vscode-builtin-emmet
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-emmet VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-emmet
+
+✍️  Process plugin vscode-builtin-fsharp
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-fsharp VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-fsharp
+
+✍️  Process plugin vscode-builtin-go
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-go VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-go
+
+✍️  Process plugin vscode-builtin-groovy
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-groovy VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-groovy
+
+✍️  Process plugin vscode-builtin-grunt
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-grunt VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-grunt
+
+✍️  Process plugin vscode-builtin-gulp
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-gulp VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-gulp
+
+✍️  Process plugin vscode-builtin-handlebars
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-handlebars VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-handlebars
+
+✍️  Process plugin vscode-builtin-hlsl
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-hlsl VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-hlsl
+
+✍️  Process plugin vscode-builtin-html
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-html VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-html
+
+✍️  Process plugin vscode-builtin-html-language-features
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-html-language-features VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-html-language-features
+
+✍️  Process plugin vscode-builtin-icon-theme-seti
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-icon-theme-seti VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-icon-theme-seti
+
+✍️  Process plugin vscode-builtin-ini
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-ini VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-ini
+
+✍️  Process plugin vscode-builtin-jake
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-jake VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-jake
+
+✍️  Process plugin vscode-builtin-java
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-java VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-java
+
+✍️  Process plugin vscode-builtin-javascript
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-javascript VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-javascript
+
+✍️  Process plugin vscode-builtin-js-debug
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-js-debug VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-js-debug
+
+✍️  Process plugin vscode-builtin-json
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-json VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-json
+
+✍️  Process plugin vscode-builtin-json-language-features
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-json-language-features VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-json-language-features
+
+✍️  Process plugin vscode-builtin-less
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-less VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-less
+
+✍️  Process plugin vscode-builtin-log
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-log VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-log
+
+✍️  Process plugin vscode-builtin-lua
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-lua VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-lua
+
+✍️  Process plugin vscode-builtin-make
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-make VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-make
+
+✍️  Process plugin vscode-builtin-markdown
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-markdown VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-markdown
+
+✍️  Process plugin vscode-builtin-markdown-language-features
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-markdown-language-features VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-markdown-language-features
+
+✍️  Process plugin vscode-builtin-merge-conflicts
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-merge-conflicts VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-merge-conflicts
+
+✍️  Process plugin vscode-builtin-npm
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-npm VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-npm
+
+✍️  Process plugin vscode-builtin-objective-c
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-objective-c VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-objective-c
+
+✍️  Process plugin vscode-builtin-perl
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-perl VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-perl
+
+✍️  Process plugin vscode-builtin-php
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-php VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-php
+
+✍️  Process plugin vscode-builtin-powershell
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-powershell VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-powershell
+
+✍️  Process plugin vscode-builtin-pug
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-pug VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-pug
+
+✍️  Process plugin vscode-builtin-python
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-python VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-python
+
+✍️  Process plugin vscode-builtin-r
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-r VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-r
+
+✍️  Process plugin vscode-builtin-razor
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-razor VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-razor
+
+✍️  Process plugin vscode-builtin-ruby
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-ruby VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-ruby
+
+✍️  Process plugin vscode-builtin-rust
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-rust VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-rust
+
+✍️  Process plugin vscode-builtin-scss
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-scss VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-scss
+
+✍️  Process plugin vscode-builtin-shaderlab
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-shaderlab VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-shaderlab
+
+✍️  Process plugin vscode-builtin-shellscript
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-shellscript VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-shellscript
+
+✍️  Process plugin vscode-builtin-sql
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-sql VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-sql
+
+✍️  Process plugin vscode-builtin-swift
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-swift VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-swift
+
+✍️  Process plugin vscode-builtin-theme-abyss
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-abyss VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-abyss
+
+✍️  Process plugin vscode-builtin-theme-defaults
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-defaults VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-defaults
+
+✍️  Process plugin vscode-builtin-theme-kimbie-dark
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-kimbie-dark VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-kimbie-dark
+
+✍️  Process plugin vscode-builtin-theme-monokai
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-monokai VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-monokai
+
+✍️  Process plugin vscode-builtin-theme-monokai-dimmed
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-monokai-dimmed VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-monokai-dimmed
+
+✍️  Process plugin vscode-builtin-theme-quietlight
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-quietlight VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-quietlight
+
+✍️  Process plugin vscode-builtin-theme-red
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-red VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-red
+
+✍️  Process plugin vscode-builtin-theme-solarized-dark
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-solarized-dark VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-solarized-dark
+
+✍️  Process plugin vscode-builtin-theme-solarized-light
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-solarized-light VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-solarized-light
+
+✍️  Process plugin vscode-builtin-theme-tomorrow-night-blue
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-theme-tomorrow-night-blue VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-theme-tomorrow-night-blue
+
+✍️  Process plugin vscode-builtin-typescript
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-typescript VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-typescript
+
+✍️  Process plugin vscode-builtin-vb
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-vb VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-vb
+
+✍️  Process plugin vscode-builtin-xml
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-xml VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-xml
+
+✍️  Process plugin vscode-builtin-yaml
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-builtin-yaml VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-builtin-yaml
+
+✍️  Process plugin vscode-git
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-git VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-git
+
+✍️  Process plugin vscode-github
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-github VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-github
+
+✍️  Process plugin vscode-references-view
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/vscode-references-view VSCode built-in unpacked extension to /home/theia-dev/theia-source-code/plugins/../production/plugins/vscode-references-view
+
+✍️  Process plugin welcome-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/welcome-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn test
+yarn run v1.22.5
+[91mwarning @eclipse-che/welcome-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ rimraf lib
+Done in 0.25s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/welcome-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[lint] warning @eclipse-che/welcome-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] warning @eclipse-che/welcome-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[compile] warning @eclipse-che/welcome-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[format] skip format check
+[format] yarn format exited with code 0
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_welcome_plugin.theia
+Done in 34.56s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/welcome-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.26s.
+Done in 38.07s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/welcome-plugin/eclipse_che_welcome_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_welcome_plugin.theia
+
+✍️  Process plugin workspace-plugin
+
+✍️  Running `yarn` on /home/theia-dev/theia-source-code/plugins/workspace-plugin
+yarn install v1.22.5
+[91mwarning package-lock.json found. Your project contains lock files generated by tools other than Yarn. It is advised not to mix package managers in order to avoid resolution inconsistencies caused by unsynchronized lock files. To clear this warning, remove package-lock.json.
+[0m[1/5] Validating package.json...
+[2/5] Resolving packages...
+success Already up-to-date.
+$ yarn clean && yarn build && yarn test
+yarn run v1.22.5
+$ rimraf lib
+[91mwarning @eclipse-che/workspace-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0mDone in 0.24s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/workspace-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ concurrently -n "format,lint,compile" -c "red,green,blue" "yarn format" "yarn lint" "yarn compile" && theia-plugin pack
+[format] warning @eclipse-che/workspace-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[format] $ if-env SKIP_FORMAT=true && echo 'skip format check' || prettier --check '{src,tests}/**/*.ts' package.json
+[lint] warning @eclipse-che/workspace-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[lint] $ if-env SKIP_LINT=true && echo 'skip lint check' || eslint --cache=true --no-error-on-unmatched-pattern=true '{src,tests}/**/*.ts'
+[compile] warning @eclipse-che/workspace-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[compile] $ tsc
+[format] skip format check
+[format] yarn format exited with code 0
+[lint] skip lint check
+[lint] yarn lint exited with code 0
+[compile] yarn compile exited with code 0
+Packaging of plugin
+🔍 Validating...✔️ 
+🗂  Getting dependencies...✔️ 
+🗃  Resolving files...✔️ 
+✂️  Excluding files...✔️ 
+✍️  Generating Assembly...✔️ 
+🎉 Generated plugin: eclipse_che_workspace_plugin.theia
+Done in 14.76s.
+yarn run v1.22.5
+[91mwarning @eclipse-che/workspace-plugin@0.0.1: The engine "theiaPlugin" appears to be invalid.
+[0m$ if-env SKIP_TEST=true && echo 'skip test' || jest --forceExit
+skip test
+Done in 0.21s.
+Done in 18.15s.
+
+✍️  Copying /home/theia-dev/theia-source-code/plugins/workspace-plugin/eclipse_che_workspace_plugin.theia theia package to /home/theia-dev/theia-source-code/plugins/../production/plugins/eclipse_che_workspace_plugin.theia
+Removing intermediate container 5ec04dd125ce
+ ---> c338ae404345
+Step 26/40 : COPY asset-untagged-theia_yeoman_plugin.theia /home/theia-dev/theia-source-code/production/plugins/theia_yeoman_plugin.theia
+ ---> c342857d74a4
+Step 27/40 : FROM node:12.20.0-alpine3.12 as build-result
+ ---> 575a04e15e83
+Step 28/40 : COPY --from=builder /home/theia-dev/theia-source-code/production /che-theia-build
+ ---> ff3912d5f5d0
+Step 29/40 : RUN find /che-theia-build -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; 2>log.txt &&     find /che-theia-build/plugins -name "*.sh" | xargs chmod +x
+ ---> Running in e013ab11bcd7
+Removing intermediate container e013ab11bcd7
+ ---> 8af4ab17f816
+Step 30/40 : FROM node:12.20.0-alpine3.12 as runtime
+ ---> 575a04e15e83
+Step 31/40 : ENV USE_LOCAL_GIT=true     HOME=/home/theia     SHELL=/bin/bash     THEIA_DEFAULT_PLUGINS=local-dir:///default-theia-plugins     LOCAL_GIT_DIRECTORY=/usr     GIT_EXEC_PATH=/usr/libexec/git-core     PORT_PLUGIN_EXCLUDE_3130=TRUE     YARN_FLAGS=""
+ ---> Running in 34c9b01b00ac
+Removing intermediate container 34c9b01b00ac
+ ---> af065ed98192
+Step 32/40 : EXPOSE 3100 3130
+ ---> Running in 256a301d9d4d
+Removing intermediate container 256a301d9d4d
+ ---> eeffd752ed06
+Step 33/40 : COPY --from=build-result /che-theia-build/plugins /default-theia-plugins
+ ---> 317a76ab6982
+Step 34/40 : RUN apk add --update --no-cache sudo git bzip2 which bash curl openssh openssh-keygen less sshpass lsblk libsecret
+ ---> Running in 95cea5d88ca3
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/main/ppc64le/APKINDEX.tar.gz
+fetch http://dl-cdn.alpinelinux.org/alpine/v3.12/community/ppc64le/APKINDEX.tar.gz
+(1/34) Installing ncurses-terminfo-base (6.2_p20200523-r0)
+(2/34) Installing ncurses-libs (6.2_p20200523-r0)
+(3/34) Installing readline (8.0.4-r0)
+(4/34) Installing bash (5.0.17-r0)
+Executing bash-5.0.17-r0.post-install
+(5/34) Installing bzip2 (1.0.8-r1)
+(6/34) Installing ca-certificates (20191127-r4)
+(7/34) Installing nghttp2-libs (1.41.0-r0)
+(8/34) Installing libcurl (7.77.0-r0)
+(9/34) Installing curl (7.77.0-r0)
+(10/34) Installing expat (2.2.9-r1)
+(11/34) Installing pcre2 (10.35-r0)
+(12/34) Installing git (2.26.3-r0)
+(13/34) Installing less (551-r0)
+(14/34) Installing libgpg-error (1.37-r0)
+(15/34) Installing libgcrypt (1.8.8-r0)
+(16/34) Installing libffi (3.3-r2)
+(17/34) Installing libintl (0.20.2-r0)
+(18/34) Installing libblkid (2.35.2-r0)
+(19/34) Installing libmount (2.35.2-r0)
+(20/34) Installing pcre (8.44-r0)
+(21/34) Installing glib (2.64.6-r0)
+(22/34) Installing libsecret (0.20.3-r0)
+(23/34) Installing libsmartcols (2.35.2-r0)
+(24/34) Installing lsblk (2.35.2-r0)
+(25/34) Installing openssh-keygen (8.3_p1-r2)
+(26/34) Installing libedit (20191231.3.1-r0)
+(27/34) Installing openssh-client (8.3_p1-r2)
+(28/34) Installing openssh-sftp-server (8.3_p1-r2)
+(29/34) Installing openssh-server-common (8.3_p1-r2)
+(30/34) Installing openssh-server (8.3_p1-r2)
+(31/34) Installing openssh (8.3_p1-r2)
+(32/34) Installing sshpass (1.06-r0)
+(33/34) Installing sudo (1.9.5p2-r0)
+(34/34) Installing which (2.21-r1)
+Executing busybox-1.31.1-r19.trigger
+Executing ca-certificates-20191127-r4.trigger
+OK: 45 MiB in 50 packages
+Removing intermediate container 95cea5d88ca3
+ ---> e38b1ce5b289
+Step 35/40 : RUN     adduser -D -S -u 1001 -G root -h ${HOME} -s /bin/sh theia     && echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers     && mkdir /projects     && mkdir /node_modules     && for f in "${HOME}" "/etc/passwd" "/etc/group /node_modules /default-theia-plugins /projects"; do           sudo chgrp -R 0 ${f} &&            sudo chmod -R g+rwX ${f};        done     && cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template     && cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template     && yarn global add ${YARN_FLAGS} yo @theia/generator-plugin@0.0.1-1622834185 generator-code typescript@3.5.3     && mkdir -p ${HOME}/.config/insight-nodejs/     && chmod -R 777 ${HOME}/.config/     && echo '{"optOut": true}' > $HOME/.config/insight-nodejs/insight-yo.json     && local_modules=$(ls -d1 /usr/*/node_modules 2>/dev/null || ls -d1 /usr/*/*/node_modules)     && mv ${local_modules}/* /usr/local/share/.config/yarn/global/node_modules && rm -rf ${local_modules} && ln -s /usr/local/share/.config/yarn/global/node_modules $(dirname ${local_modules})/     && rm -rf /tmp/*     && yarn cache clean     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
+ ---> Running in 0a6dfb1f9254
+yarn global v1.22.5
+[1/4] Resolving packages...
+[91mwarning yo > insight > request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+[0m[91mwarning yo > insight > uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+warning yo > insight > request > uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+[0m[91mwarning yo > insight > request > har-validator@5.1.5: this library is no longer supported
+[0m[91mwarning yo > yeoman-doctor > bin-version-check > bin-version > execa > cross-spawn-async@2.2.5: cross-spawn no longer requires a build toolchain, use it instead
+[0m[91mwarning yo > yeoman-environment > @npmcli/arborist > @npmcli/run-script > node-gyp > request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+[0m[91mwarning @theia/generator-plugin > yeoman-generator > mem-fs-editor > globby > fast-glob > micromatch > snapdragon > source-map-resolve > resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+[0m[91mwarning @theia/generator-plugin > yeoman-generator > mem-fs-editor > globby > fast-glob > micromatch > snapdragon > source-map-resolve > urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+[0m[2/4] Fetching packages...
+[3/4] Linking dependencies...
+[91mwarning "yo > yeoman-environment@3.4.1" has unmet peer dependency "mem-fs@^1.2.0 || ^2.0.0".
+[0m[4/4] Building fresh packages...
+[91mwarning "@theia/generator-plugin@0.0.1-1622834185" has no binaries
+warning "generator-code@1.5.2" has no binaries
+[0msuccess Installed "yo@4.2.0" with binaries:
+      - yo
+      - yo-complete
+success Installed "typescript@3.5.3" with binaries:
+      - tsc
+      - tsserver
+Done in 281.17s.
+yarn cache v1.22.5
+success Cleared cache.
+Done in 4.44s.
+Removing intermediate container 0a6dfb1f9254
+ ---> 59b8fd7ae6b7
+Step 36/40 : COPY --chown=theia:root --from=build-result /che-theia-build /home/theia
+ ---> 8800336455df
+Step 37/40 : USER theia
+ ---> Running in 3ebd52c2f3e1
+Removing intermediate container 3ebd52c2f3e1
+ ---> 658f31f786cc
+Step 38/40 : WORKDIR /projects
+ ---> Running in 0d893bcb5640
+Removing intermediate container 0d893bcb5640
+ ---> 3770e3f785ea
+Step 39/40 : COPY src/entrypoint.sh /entrypoint.sh
+ ---> d92d65c904fb
+Step 40/40 : ENTRYPOINT ["/entrypoint.sh"]
+ ---> Running in 3599e4828174
+Removing intermediate container 3599e4828174
+ ---> 56c113102220
+Successfully built 56c113102220
+Successfully tagged eclipse/che-theia:next
+Build of [1;34meclipse/che-theia:next [0;32m[OK][0m
+[0;32mScript run successfully: [1;34meclipse/che-theia:next[0m
+Extracting artifacts for the CDN
+Building image in dockerfiles/theia-endpoint-runtime-binary
+[1mBuilding Docker Image eclipse/che-theia-endpoint-runtime-binary:next (target alpine) from /home/ubuntu/rohan/che-theia/dockerfiles/theia-endpoint-runtime-binary directory with tag next[0m
+Sending build context to Docker daemon  17.41kB
+Step 1/16 : FROM quay.io/eclipse/che-custom-nodejs-deasync:12.20.0 as custom-nodejs
+12.20.0: Pulling from eclipse/che-custom-nodejs-deasync
+692a9d763e19: Pulling fs layer
+75ec3b08cc0d: Pulling fs layer
+692a9d763e19: Verifying Checksum
+692a9d763e19: Download complete
+75ec3b08cc0d: Verifying Checksum
+75ec3b08cc0d: Download complete
+692a9d763e19: Pull complete
+75ec3b08cc0d: Pull complete
+Digest: sha256:642a4755b21f1b44dd2a7e501e60eac0fa54a9dbaabaae0269e24675bb643615
+Status: Downloaded newer image for quay.io/eclipse/che-custom-nodejs-deasync:12.20.0
+ ---> 345bc6f86da5
+Step 2/16 : FROM eclipse/che-theia:next as builder
+ ---> 56c113102220
+Step 3/16 : ARG NEXE_SHA1=0f0869b292f1d7b68ba6e170d628de68a10c009f
+ ---> Running in e15f1ac688a6
+Removing intermediate container e15f1ac688a6
+ ---> 8d225f23d6d5
+Step 4/16 : WORKDIR /home/theia
+ ---> Running in 397f8867c394
+Removing intermediate container 397f8867c394
+ ---> 97ce19aedc72
+Step 5/16 : ENV PATH=${HOME}/.yarn/bin:${PATH}
+ ---> Running in 0daf56c18fe7
+Removing intermediate container 0daf56c18fe7
+ ---> 341bdb126b60
+Step 6/16 : ENV NEXE_FLAGS="--target 'alpine-x64-12' --temp /tmp/nexe-cache"
+ ---> Running in 6ccb111bfbc4
+Removing intermediate container 6ccb111bfbc4
+ ---> eb5e944f8022
+Step 7/16 : COPY --from=custom-nodejs /alpine-x64-12 /tmp/nexe-cache/alpine-x64-12
+ ---> 1bef11581e57
+Step 8/16 : WORKDIR /tmp
+ ---> Running in 550dab41e75e
+Removing intermediate container 550dab41e75e
+ ---> d0fb0aa952e5
+Step 9/16 : RUN git clone https://github.com/nexe/nexe
+ ---> Running in 9ac77325e94d
+[91mCloning into 'nexe'...
+[0mRemoving intermediate container 9ac77325e94d
+ ---> 1f194dc9fcc0
+Step 10/16 : WORKDIR /tmp/nexe
+ ---> Running in 6e7aeeda738d
+Removing intermediate container 6e7aeeda738d
+ ---> 0ac056822e74
+Step 11/16 : RUN git checkout ${NEXE_SHA1} && npm install && npm run build
+ ---> Running in 742e0e5fe837
+[91mNote: switching to '0f0869b292f1d7b68ba6e170d628de68a10c009f'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at 0f0869b fix: internal module read json changes 12.18.3 (#803)
+[0m
+> nexe@4.0.0-beta.14 prepare /tmp/nexe
+> npm run lint && npm run build && npm test
+
+
+> nexe@4.0.0-beta.14 lint /tmp/nexe
+> tslint "{src,plugins,tasks}/**/*.ts" --fix
+
+
+> nexe@4.0.0-beta.14 prebuild /tmp/nexe
+> rimraf lib
+
+
+> nexe@4.0.0-beta.14 build /tmp/nexe
+> tsc --declaration
+
+
+> nexe@4.0.0-beta.14 postbuild /tmp/nexe
+> ts-node tasks/post-build
+
+Copied:  src/fs/package.json To:  lib/fs/package.json
+Copied:  src/fs/bootstrap.js To:  lib/fs/bootstrap.js
+Copied:  src/fs/README.md To:  lib/fs/README.md
+Replacing:  '{{replace:lib/fs/bootstrap.js}}'
+Replacing:  '{{replace:lib/patches/boot-nexe.js}}'
+Replacing:  '{{replace:lib/patches/boot-nexe.js}}'
+Replacing:  '{{replace:lib/patches/boot-nexe.js}}'
+Wrote: lib/patches/third-party-main.js
+Replacing:  '{{replace:lib/fs/patch.js}}'
+Wrote: lib/steps/shim.js
+Replacing:  '{{replace:0}}'
+Wrote: lib/options.js
+
+> nexe@4.0.0-beta.14 test /tmp/nexe
+> mocha
+
+[91m(node:84) DeprecationWarning: Configuration via mocha.opts is DEPRECATED and will be removed from a future version of Mocha. Use RC files or package.json instead.
+[0m
+
+  options
+    cwd
+      ✓ should use process.cwd() if nothing is provided
+      ✓ should use the main module in a package directory (if not in a TTY)
+      ✓ should resolve relative paths for input
+      ✓ should accept a module entry as input
+      ✓ should resolve pathed options against cwd
+    remote
+      ✓ should use default remote
+      ✓ should append trailing slash to third-party remote if necessary
+      ✓ should not append trailing slash to third-party remote that already has one
+    output
+      ✓ should work
+      ✓ should default to the input file name if not index
+      ✓ should default to the folder/project name if filename is index
+
+  Targets
+    ✓ should accept: "win-ia32-6.11.2"                                     ->   windows-x86-6.11.2
+    ✓ should accept: {"version":"6.11.2","platform":"win","arch":"ia32"}   ->   windows-x86-6.11.2
+    ✓ should accept: "win32-x64-6.11.2"                                    ->   windows-x64-6.11.2
+    ✓ should accept: "win-amd64-6.11.2"                                    ->   windows-x64-6.11.2
+    ✓ should accept: "darwin-x64-v8.4.0"                                   ->   mac-x64-8.4.0
+    ✓ should accept: "macos-x64-v8.4.0"                                    ->   mac-x64-8.4.0
+    ✓ should accept: "static-x86-6.10.3"                                   ->   alpine-x86-6.10.3
+    ✓ should accept: "linux-x32"                                           ->   linux-x86-12.20.0
+    ✓ should accept: "alpine-notsupported-6.10.3"                          ->   alpine-ppc64-6.10.3
+    ✓ should accept: "not-a-thing"                                         ->   linux-ppc64-12.20.0
+    ✓ should stringify and toString
+
+
+  22 passing (71ms)
+
+added 341 packages from 286 contributors and audited 342 packages in 83.631s
+[91mnpm WARN optional SKIPPING OPTIONAL DEPENDENCY: fsevents@2.1.3 (node_modules/fsevents):
+npm WARN notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for fsevents@2.1.3: wanted {"os":"darwin","arch":"any"} (current: {"os":"linux","arch":"ppc64"})
+
+[0m
+20 packages are looking for funding
+  run `npm fund` for details
+
+found 12 vulnerabilities (2 low, 4 moderate, 6 high)
+  run `npm audit fix` to fix them, or `npm audit` for details
+
+> nexe@4.0.0-beta.14 prebuild /tmp/nexe
+> rimraf lib
+
+
+> nexe@4.0.0-beta.14 build /tmp/nexe
+> tsc --declaration
+
+
+> nexe@4.0.0-beta.14 postbuild /tmp/nexe
+> ts-node tasks/post-build
+
+Copied:  src/fs/package.json To:  lib/fs/package.json
+Copied:  src/fs/bootstrap.js To:  lib/fs/bootstrap.js
+Copied:  src/fs/README.md To:  lib/fs/README.md
+Replacing:  '{{replace:lib/fs/bootstrap.js}}'
+Replacing:  '{{replace:lib/patches/boot-nexe.js}}'
+Replacing:  '{{replace:lib/patches/boot-nexe.js}}'
+Replacing:  '{{replace:lib/patches/boot-nexe.js}}'
+Wrote: lib/patches/third-party-main.js
+Replacing:  '{{replace:lib/fs/patch.js}}'
+Wrote: lib/steps/shim.js
+Replacing:  '{{replace:0}}'
+Wrote: lib/options.js
+Removing intermediate container 742e0e5fe837
+ ---> 6c473753287a
+Step 12/16 : WORKDIR /home/theia
+ ---> Running in 3b5b8c23bf52
+Removing intermediate container 3b5b8c23bf52
+ ---> 0ce18c25c56e
+Step 13/16 : RUN /tmp/nexe/index.js -v &&     eval /tmp/nexe/index.js -i node_modules/@eclipse-che/theia-remote/lib/node/plugin-remote.js ${NEXE_FLAGS} -o ${HOME}/plugin-remote-endpoint
+ ---> Running in 2e97ce72cce4
+[91m4.0.0-beta.14
+[0m[91m- Starting...
+ℹ nexe 4.0.0-beta.14
+[0m[91m- nexe 4.0.0-beta.14
+[0m[91m- Already downloaded...
+[0m[91m- Compiling result
+[0m[91m✔ Entry: 'node_modules/@eclipse-che/theia-remote/lib/node/plugin-remote.js' written to: plugin-remote-endpoint
+- Finished in 31.76s
+✔ Finished in 31.76s
+[0mRemoving intermediate container 2e97ce72cce4
+ ---> bfd7132d9e47
+Step 14/16 : FROM alpine:3.12.1 as runtime
+3.12.1: Pulling from library/alpine
+692a9d763e19: Already exists
+Digest: sha256:c0e9560cda118f9ec63ddefb4a173a2b2a0347082d7dff7dc14272e7841a5b5a
+Status: Downloaded newer image for alpine:3.12.1
+ ---> f0db2c0489a0
+Step 15/16 : COPY --from=builder /home/theia/plugin-remote-endpoint /plugin-remote-endpoint
+ ---> 65b7d435eea4
+Step 16/16 : ENTRYPOINT cp -rf /plugin-remote-endpoint /remote-endpoint/plugin-remote-endpoint
+ ---> Running in 44d7a8ca91bc
+Removing intermediate container 44d7a8ca91bc
+ ---> 953ce8b680cd
+[Warning] One or more build-args [GITHUB_TOKEN] were not consumed
+Successfully built 953ce8b680cd
+Successfully tagged eclipse/che-theia-endpoint-runtime-binary:next
+Build of [1;34meclipse/che-theia-endpoint-runtime-binary:next [0;32m[OK][0m
+[0;32mScript run successfully: [1;34meclipse/che-theia-endpoint-runtime-binary:next[0m
+Building image in dockerfiles/theia-vsix-installer
+[1mBuilding Docker Image eclipse/che-theia-vsix-installer:next (target alpine) from /home/ubuntu/rohan/che-theia/dockerfiles/theia-vsix-installer directory with tag next[0m
+Sending build context to Docker daemon  12.29kB
+Step 1/4 : FROM alpine:3.13.4 as runtime
+3.13.4: Pulling from library/alpine
+dc4792b25345: Pulling fs layer
+dc4792b25345: Verifying Checksum
+dc4792b25345: Download complete
+dc4792b25345: Pull complete
+Digest: sha256:ec14c7992a97fc11425907e908340c6c3d6ff602f5f13d899e6b7027c9b4133a
+Status: Downloaded newer image for alpine:3.13.4
+ ---> 3bb63a7f57d6
+Step 2/4 : RUN apk add --update --no-cache curl bash
+ ---> Running in 88cf397e82c8
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.13/main/ppc64le/APKINDEX.tar.gz
+fetch https://dl-cdn.alpinelinux.org/alpine/v3.13/community/ppc64le/APKINDEX.tar.gz
+(1/9) Installing ncurses-terminfo-base (6.2_p20210109-r0)
+(2/9) Installing ncurses-libs (6.2_p20210109-r0)
+(3/9) Installing readline (8.1.0-r0)
+(4/9) Installing bash (5.1.0-r0)
+Executing bash-5.1.0-r0.post-install
+(5/9) Installing ca-certificates (20191127-r5)
+(6/9) Installing brotli-libs (1.0.9-r3)
+(7/9) Installing nghttp2-libs (1.42.0-r1)
+(8/9) Installing libcurl (7.77.0-r1)
+(9/9) Installing curl (7.77.0-r1)
+Executing busybox-1.32.1-r5.trigger
+Executing ca-certificates-20191127-r5.trigger
+OK: 11 MiB in 23 packages
+Removing intermediate container 88cf397e82c8
+ ---> 17a412a1f4a0
+Step 3/4 : COPY src/entrypoint.sh /entrypoint.sh
+ ---> bea714587b65
+Step 4/4 : ENTRYPOINT ["/entrypoint.sh"]
+ ---> Running in 2331b080cfd0
+Removing intermediate container 2331b080cfd0
+ ---> e757490bfd60
+[Warning] One or more build-args [GITHUB_TOKEN] were not consumed
+Successfully built e757490bfd60
+Successfully tagged eclipse/che-theia-vsix-installer:next
+Build of [1;34meclipse/che-theia-vsix-installer:next [0;32m[OK][0m
+[0;32mScript run successfully: [1;34meclipse/che-theia-vsix-installer:next[0m
